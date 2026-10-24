@@ -28,7 +28,7 @@
       b.onclick = () => { kanaScript = v; JT.go('kana'); };
       return b;
     }));
-    pg.appendChild(h('div.page-head', h('div', h('h1', 'Kana'), h('div.sub', 'The two Japanese alphabets. Click any character for its memory hook and stroke order.')), seg));
+    pg.appendChild(h('div.page-head', h('div', h('h1', 'Kana'), h('div.sub', 'The two Japanese alphabets. ' + (JT.platform.touch ? 'Tap' : 'Click') + ' any character for its memory hook and stroke order.')), seg));
 
     const cell = c => {
       if (!c || c === ' ') return h('div.kcell.empty');
@@ -43,7 +43,7 @@
       return g;
     };
     const yoonChart = () => {
-      const g = h('div.kana-grid.wide', { style: { gridTemplateColumns: 'repeat(3, 90px)' } });
+      const g = h('div.kana-grid.wide', { style: { gridTemplateColumns: 'repeat(3, minmax(0, 90px))' } });
       for (const r of YOON) for (let i = 0; i < 6; i += 2) g.appendChild(cell(conv(r.slice(i, i + 2))));
       return g;
     };
@@ -62,7 +62,7 @@
       h('div', h('h3', 'Voiced (dakuten ゛ handakuten ゜)'), chart(DAKU), h('h3', 'Combinations (yōon)'), yoonChart())));
     if (kanaScript === 'kata') {
       const ext = ['ティ', 'ディ', 'ファ', 'フィ', 'フェ', 'フォ', 'ウィ', 'ウェ', 'ウォ', 'シェ', 'チェ', 'ジェ', 'ヴァ', 'ヴィ', 'ヴ', 'ヴェ', 'ヴォ', 'デュ'];
-      const g = h('div.kana-grid.wide', { style: { gridTemplateColumns: 'repeat(6, 90px)' } }, ext.map(c => cell(c)));
+      const g = h('div.kana-grid.wide', { style: { gridTemplateColumns: 'repeat(6, minmax(0, 90px))' } }, ext.map(c => cell(c)));
       pg.appendChild(h('div', h('h3', 'Extended katakana for foreign sounds'), g));
     }
     return pg;
@@ -129,7 +129,7 @@
     const pg = h('div.page');
     const total = R.kanji.size;
     const known = [...R.kanji.keys()].filter(c => JT.SRS.has('j:' + c)).length;
-    pg.appendChild(h('div.page-head', h('div', h('h1', 'Kanji'), h('div.sub', `${total.toLocaleString()} JLPT kanji · ${known} in your reviews. Click any kanji for stroke order, readings and words.`))));
+    pg.appendChild(h('div.page-head', h('div', h('h1', 'Kanji'), h('div.sub', `${total.toLocaleString()} JLPT kanji · ${known} in your reviews. ${JT.platform.touch ? 'Tap' : 'Click'} any kanji for stroke order, readings and words.`))));
     const chips = h('div', [5, 4, 3, 2, 1].map(j => {
       const n = [...R.kanji.values()].filter(k => k.jlpt === j).length;
       const c = h('button.chip' + (kanjiFilter === j ? '.on' : ''), { type: 'button' }, `N${j} · ${n}`);

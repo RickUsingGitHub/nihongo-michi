@@ -3,3 +3,4 @@ dist/
 dist-next/
 *.log
 .claude/
+google-oauth.local.json

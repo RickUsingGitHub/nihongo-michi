@@ -128,7 +128,7 @@
     pg.appendChild(h('div.page-head', h('div', h('h1', 'Review & Learn'), h('div.sub', 'Spaced repetition shows each item just before you would forget it.'))));
 
     const nextT = JT.SRS.nextDue();
-    const hero = h('div.card', { style: { display: 'flex', gap: '24px', alignItems: 'center', padding: '22px 26px' } },
+    const hero = h('div.card.review-hero', { style: { display: 'flex', gap: '24px', alignItems: 'center', padding: '22px 26px' } },
       JT.ui.ring(due.length ? 1 : 0, 104, `<b style="font-size:28px">${due.length}</b><br><span class="tiny muted">due</span>`, 'var(--accent)'),
       h('div.grow',
         h('div', { style: { fontSize: '20px', fontWeight: 750 } }, due.length ? `${due.length} item${due.length > 1 ? 's' : ''} ready for review` : 'All caught up! 🎉'),

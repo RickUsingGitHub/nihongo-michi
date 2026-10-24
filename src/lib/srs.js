@@ -29,6 +29,7 @@
     const r = db()[key];
     if (!r) return;
     r.n++;
+    r.t = now();   // last review — when syncing, the most recent review of an item wins
     if (ok) {
       r.c++;
       r.b = Math.min(8, r.b + 1);

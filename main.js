@@ -1,7 +1,9 @@
 // Nihongo Michi - Electron main process.
-const { app, BrowserWindow, ipcMain, shell, session, Menu } = require('electron');
+const { app, BrowserWindow, ipcMain, shell, session, Menu, safeStorage } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const http = require('http');
+const crypto = require('crypto');
 const { spawn } = require('child_process');
 
 let win = null;
@@ -82,11 +84,12 @@ function saveProfile(id, json, summary) {
 }
 
 ipcMain.handle('profiles:list', () => { migrateLegacy(); return readIndex(); });
-ipcMain.handle('profiles:create', (_e, name) => {
+// wantId: a learner restored from Google Drive keeps the id it has on the other device
+ipcMain.handle('profiles:create', (_e, name, wantId) => {
   const n = cleanName(name);
   if (!n) return null;
   const ix = readIndex();
-  const id = newId();
+  const id = validId(wantId) && !ix.profiles.some(p => p.id === wantId) ? wantId : newId();
   ix.profiles.push({ id, name: n, created: Date.now(), lastUsed: Date.now() });
   ix.last = id;
   writeIndex(ix);
@@ -109,6 +112,7 @@ ipcMain.handle('profiles:delete', (_e, id) => {
   writeIndex(ix);
   // keep the data as a recoverable file rather than erasing it outright
   try { fs.renameSync(profileFile(id), profileFile(id) + '.deleted'); } catch { /* already gone */ }
+  googleForget(id);
   return true;
 });
 ipcMain.handle('profiles:touch', (_e, id) => {
@@ -189,6 +193,137 @@ ipcMain.handle('tts:speak', async (_e, text, rate, voice, ssml) => {
   return (await speech.request(req)).wav;
 });
 ipcMain.handle('open:speech-settings', () => shell.openExternal('ms-settings:speech'));
+
+// ---------- Google sign-in for Drive sync ----------
+// Uses the "Desktop app" OAuth client from google-oauth.local.json ({ "clientId", "clientSecret" }), which
+// is kept out of the public repository and packaged into the .exe. Sign-in runs in the system browser and
+// returns to a one-off local address (http://127.0.0.1:<port>) with PKCE. The refresh token is stored per
+// learner in profiles/<id>.google, encrypted with Windows' data protection (safeStorage).
+const GOOGLE_SCOPE = 'https://www.googleapis.com/auth/drive.appdata openid email';
+const googleKey = k => k === 'pending' || validId(k);
+const googleFile = k => path.join(profilesDir(), k + '.google');
+const googleTokens = new Map();   // learner id -> { token, exp, email }
+let googleCfg;
+function googleConfig() {
+  if (googleCfg === undefined) {
+    try {
+      const c = JSON.parse(fs.readFileSync(path.join(__dirname, 'google-oauth.local.json'), 'utf8'));
+      googleCfg = c.clientId && c.clientSecret ? c : null;
+    } catch { googleCfg = null; }
+  }
+  return googleCfg;
+}
+const b64url = buf => buf.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+const jwtEmail = jwt => { try { return JSON.parse(Buffer.from(jwt.split('.')[1], 'base64').toString('utf8')).email || ''; } catch { return ''; } };
+
+function googleSave(key, data) {
+  const text = JSON.stringify(data);
+  const body = safeStorage.isEncryptionAvailable() ? { enc: safeStorage.encryptString(text).toString('base64') } : { plain: data };
+  writeAtomic(googleFile(key), JSON.stringify(body));
+}
+function googleLoad(key) {
+  try {
+    const body = JSON.parse(fs.readFileSync(googleFile(key), 'utf8'));
+    return body.enc ? JSON.parse(safeStorage.decryptString(Buffer.from(body.enc, 'base64'))) : body.plain;
+  } catch { return null; }
+}
+function googleForget(key) {
+  googleTokens.delete(key);
+  try { fs.unlinkSync(googleFile(key)); } catch { /* not connected */ }
+}
+
+const googlePage = (title, msg) => `<!doctype html><meta charset="utf-8"><title>${title}</title>
+<body style="font-family:Segoe UI,sans-serif;background:#f6f1e7;color:#24201b;display:grid;place-items:center;height:90vh;margin:0">
+<div style="text-align:center"><div style="font-size:54px">道</div><h2>${title}</h2><p>${msg}</p></div>`;
+
+async function googleSignIn(key) {
+  const cfg = googleConfig();
+  if (!cfg) throw new Error('Google sync is not set up in this copy of the app.');
+  const verifier = b64url(crypto.randomBytes(32));
+  const challenge = b64url(crypto.createHash('sha256').update(verifier).digest());
+  const state = b64url(crypto.randomBytes(16));
+  const server = http.createServer();
+  await new Promise((res, rej) => { server.once('error', rej); server.listen(0, '127.0.0.1', res); });
+  const redirect = `http://127.0.0.1:${server.address().port}`;
+  try {
+    const code = await new Promise((resolve, reject) => {
+      const timer = setTimeout(() => reject(new Error('Sign-in timed out')), 5 * 60000);
+      server.on('request', (req, res) => {
+        const u = new URL(req.url, redirect);
+        if (u.pathname !== '/') { res.writeHead(404); res.end(); return; }
+        const ok = u.searchParams.get('code') && u.searchParams.get('state') === state;
+        res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+        res.end(ok ? googlePage('Signed in', 'You can close this tab and go back to Nihongo Michi.')
+          : googlePage('Sign-in cancelled', 'Nothing was changed. You can close this tab.'));
+        clearTimeout(timer);
+        if (ok) resolve(u.searchParams.get('code'));
+        else reject(new Error(u.searchParams.get('error') === 'access_denied' ? 'Sign-in was cancelled' : 'Sign-in failed'));
+      });
+      shell.openExternal('https://accounts.google.com/o/oauth2/v2/auth?' + new URLSearchParams({
+        client_id: cfg.clientId, redirect_uri: redirect, response_type: 'code', scope: GOOGLE_SCOPE, state,
+        code_challenge: challenge, code_challenge_method: 'S256', access_type: 'offline', prompt: 'consent select_account'
+      }));
+    });
+    const r = await fetch('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      body: new URLSearchParams({ code, client_id: cfg.clientId, client_secret: cfg.clientSecret, redirect_uri: redirect, grant_type: 'authorization_code', code_verifier: verifier })
+    });
+    const tok = await r.json();
+    if (!r.ok || !tok.refresh_token) throw new Error('Google did not finish the sign-in (' + (tok.error_description || tok.error || r.status) + ')');
+    if (!String(tok.scope || '').includes('drive.appdata')) throw new Error('Please allow access to the app\'s Google Drive storage to sync.');
+    const email = jwtEmail(tok.id_token || '');
+    googleSave(key, { refresh: tok.refresh_token, email });
+    googleTokens.set(key, { token: tok.access_token, exp: Date.now() + (tok.expires_in - 60) * 1000, email });
+    if (win) { if (win.isMinimized()) win.restore(); win.focus(); }
+    return { email };
+  } finally { server.close(); }
+}
+
+async function googleToken(key) {
+  const cached = googleTokens.get(key);
+  if (cached && cached.exp > Date.now()) return { token: cached.token, email: cached.email };
+  const saved = googleLoad(key), cfg = googleConfig();
+  if (!saved || !cfg) return null;
+  const r = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    body: new URLSearchParams({ client_id: cfg.clientId, client_secret: cfg.clientSecret, refresh_token: saved.refresh, grant_type: 'refresh_token' })
+  });
+  const tok = await r.json().catch(() => ({}));
+  if (!r.ok) {
+    if (tok.error === 'invalid_grant') googleForget(key);   // access was removed in the Google account
+    return null;
+  }
+  googleTokens.set(key, { token: tok.access_token, exp: Date.now() + (tok.expires_in - 60) * 1000, email: saved.email });
+  return { token: tok.access_token, email: saved.email };
+}
+
+ipcMain.handle('google:available', () => !!googleConfig());
+ipcMain.handle('google:status', (_e, key) => {
+  if (!googleKey(key)) return null;
+  const s = googleLoad(key);
+  return s ? { email: s.email } : null;
+});
+ipcMain.handle('google:signin', (_e, key) => {
+  if (!googleKey(key)) throw new Error('bad learner');
+  return googleSignIn(key);
+});
+ipcMain.handle('google:token', (_e, key) => (googleKey(key) ? googleToken(key) : null));
+ipcMain.handle('google:signout', async (_e, key) => {
+  if (!googleKey(key)) return false;
+  const s = googleLoad(key);
+  if (s && s.refresh) await fetch('https://oauth2.googleapis.com/revoke?token=' + encodeURIComponent(s.refresh), { method: 'POST' }).catch(() => {});
+  googleForget(key);
+  return true;
+});
+ipcMain.handle('google:rekey', (_e, from, to) => {
+  if (!googleKey(from) || !validId(to) || from === to) return false;
+  const s = googleLoad(from);
+  if (!s) return false;
+  googleSave(to, s);
+  if (googleTokens.has(from)) googleTokens.set(to, googleTokens.get(from));
+  googleForget(from);
+  return true;
+});
 
 // ---------- window ----------
 function createWindow() {

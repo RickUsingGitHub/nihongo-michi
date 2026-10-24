@@ -32,11 +32,44 @@
         if (this.webVoices.length) {
           this.mode = 'web';
           this.available = true;
+          // iPhones only let a page speak after speech has started from a tap; a silent utterance on the
+          // first tap allows the automatic prompts later on
+          const unlock = () => {
+            const u = new SpeechSynthesisUtterance(' ');
+            u.volume = 0;
+            speechSynthesis.speak(u);
+            document.removeEventListener('pointerdown', unlock, true);
+          };
+          document.addEventListener('pointerdown', unlock, true);
           this.jaVoices = this.webVoices.map(v => ({ id: v.voiceURI, name: v.name, lang: v.lang }));
         }
       }
       JT.emit('audio-ready', this.available);
       return this.available;
+    },
+
+    // How to add a Japanese voice on this kind of device.
+    voiceHelp() {
+      const P = JT.platform || {};
+      if (P.desktop) return {
+        where: 'this PC', short: 'Windows needs its Japanese voice installed: Settings → Time & language → Speech → Add voices → Japanese. Then restart this app.',
+        steps: ['Open Windows Settings → Time & language → Speech.', 'Under "Manage voices", click Add voices.',
+          'Search for Japanese, tick "Japanese (Japan)" and click Add.', 'Once it has installed, click "Check again" below (or restart the app).']
+      };
+      if (P.ios) return {
+        where: 'this iPhone', short: 'Add a Japanese voice: Settings → Accessibility → Spoken Content → Voices → Japanese. Then reopen this app.',
+        steps: ['Open the Settings app → Accessibility → Spoken Content → Voices.', 'Tap Japanese and download a voice (for example Kyoko).',
+          'Come back here and tap "Check again" (or close and reopen the app).']
+      };
+      if (P.android) return {
+        where: 'this phone', short: 'Add Japanese to your phone\'s text-to-speech: Settings → Languages & input → Text-to-speech → Install voice data → Japanese.',
+        steps: ['Open Settings → System → Languages & input → Text-to-speech output.', 'Tap the gear next to the speech engine → Install voice data → Japanese.',
+          'Come back here and tap "Check again" (or close and reopen the app).']
+      };
+      return {
+        where: 'this browser', short: 'This browser has no Japanese voice. Chrome or Edge usually include one, or add a Japanese voice in your system\'s speech settings.',
+        steps: ['Try the app in Chrome or Edge, which usually include a Japanese voice.', 'Or add a Japanese voice in your computer\'s speech settings, then reload.']
+      };
     },
 
     stop() {
@@ -53,7 +86,7 @@
       if (!this.available) {
         if (!warned && !opts.silent) {
           warned = true;
-          JT.ui && JT.ui.toast('No Japanese voice is installed yet — see Settings → Audio to add one (free, built into Windows).');
+          JT.ui && JT.ui.toast(`No Japanese voice on ${this.voiceHelp().where} yet — see Settings → Audio to add one (free).`);
         }
         return;
       }

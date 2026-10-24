@@ -299,7 +299,7 @@
     const ghostBtn = h('button.btn.sm', { type: 'button', onclick: () => { const hidden = ghost.style.opacity === '0'; ghost.style.opacity = hidden ? '1' : '0'; nums.style.opacity = hidden ? '1' : '0'; ghostBtn.lastChild.textContent = hidden ? 'Hide guide' : 'Show guide'; } }, icon('eye'), 'Hide guide');
     controls.append(ghostBtn, h('button.btn.sm', { type: 'button', onclick: clearInk }, icon('undo'), 'Clear'));
     wrap.append(box, controls);
-    if (paths) wrap.appendChild(h('div.tiny.muted', `${paths.length} stroke${paths.length > 1 ? 's' : ''} · trace with your mouse or pen`));
+    if (paths) wrap.appendChild(h('div.tiny.muted', `${paths.length} stroke${paths.length > 1 ? 's' : ''} · trace with your ${JT.platform && JT.platform.touch ? 'finger' : 'mouse or pen'}`));
     if (opts.autoplay !== false && paths) setTimeout(play, 300);
     return wrap;
   }

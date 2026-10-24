@@ -5,7 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const SRC = path.join(__dirname, '..', 'src');
 
-const win = { console, addEventListener() {}, matchMedia: () => ({ matches: false, addEventListener() {} }) };
+const win = { console, addEventListener() {}, matchMedia: () => ({ matches: false, addEventListener() {} }), navigator: { userAgent: 'node', platform: 'node', maxTouchPoints: 0 }, document: { addEventListener() {} } };
 win.window = win;
 vm.createContext(win);
 const html = fs.readFileSync(path.join(SRC, 'index.html'), 'utf8');

@@ -35,6 +35,31 @@
   const dayKey = (d = new Date()) =>
     d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
 
+  // Each install has its own id. XP, daily activity and answer counts are kept per device (state.contrib)
+  // so that syncing the computer and the phone adds them up instead of counting anything twice.
+  let devId = null;
+  function deviceId() {
+    if (devId) return devId;
+    try { devId = localStorage.getItem('jt-device'); } catch (e) { /* storage blocked */ }
+    if (!devId) {
+      devId = 'd' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+      try { localStorage.setItem('jt-device', devId); } catch (e) { /* storage blocked */ }
+    }
+    return devId;
+  }
+  const mine = s => {
+    s.contrib = s.contrib || {};
+    return (s.contrib[deviceId()] = s.contrib[deviceId()] || { xp: 0, answered: 0, correct: 0, days: {} });
+  };
+
+  // Fills in defaults; progress from before syncing existed is credited to this device.
+  function normalize(st) {
+    const s = Object.assign(fresh(), st || {});
+    s.settings = Object.assign({}, DEFAULT_SETTINGS, s.settings || {});
+    if (!s.contrib) s.contrib = { [deviceId()]: { xp: s.xp || 0, answered: s.stats.answered || 0, correct: s.stats.correct || 0, days: Object.assign({}, s.days) } };
+    return s;
+  }
+
   // ---------- browser fallback (localStorage) mirroring the desktop profile API ----------
   const local = {
     index() {
@@ -56,9 +81,9 @@
       return ix;
     },
     write(ix) { localStorage.setItem('jt-profiles', JSON.stringify(ix)); },
-    create(name) {
+    create(name, wantId) {
       const ix = local.index();
-      const id = 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+      const id = /^[a-z0-9]{8,24}$/.test(wantId || '') && !ix.profiles.some(p => p.id === wantId) ? wantId : 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
       ix.profiles.push({ id, name, created: Date.now(), lastUsed: Date.now() });
       ix.last = id;
       local.write(ix);
@@ -86,8 +111,7 @@
   function useState(raw) {
     let st = null;
     try { st = raw ? JSON.parse(raw) : null; } catch (e) { st = null; }
-    JT.state = Object.assign(fresh(), st || {});
-    JT.state.settings = Object.assign({}, DEFAULT_SETTINGS, JT.state.settings || {});
+    JT.state = normalize(st);
   }
 
   // Start-up: an empty placeholder state until a learner is chosen.
@@ -109,23 +133,29 @@
     return p;
   }
 
-  async function createProfile(name) {
+  // opts.id and opts.state: recreate a learner restored from Google Drive under the same id
+  async function createProfile(name, opts = {}) {
     const n = String(name || '').trim().slice(0, 30);
     if (!n) throw new Error('Please enter a name');
-    const id = api() ? await api().profilesCreate(n) : local.create(n);
+    const id = api() ? await api().profilesCreate(n, opts.id) : local.create(n, opts.id);
     if (!id) throw new Error('Could not create the learner');
-    useState(null);
+    JT.state = normalize(opts.state || null);
     JT.state.name = n;
     current = id;
     save(true);
     return id;
   }
 
-  async function renameProfile(id, name) {
+  // fromSync: the new name came from another device, so it doesn't count as a fresh rename
+  async function renameProfile(id, name, fromSync) {
     const n = String(name || '').trim().slice(0, 30);
     if (!n) return false;
     const ok = api() ? await api().profilesRename(id, n) : local.rename(id, n);
-    if (ok && id === current) { JT.state.name = n; save(); }
+    if (ok && id === current) {
+      JT.state.name = n;
+      if (!fromSync) JT.state.nameAt = Date.now();
+      save();
+    }
     return ok;
   }
 
@@ -153,6 +183,7 @@
       if (api()) { if (sync) api().profileSaveSync(current, json, sum); else api().profileSave(current, json, sum); }
       else local.save(current, json, sum);
     } catch (e) { console.error('save failed', e); }
+    if (!sync) JT.emit('saved', current);
   }
   function save(now) {
     clearTimeout(timer);
@@ -183,6 +214,9 @@
     s.xp += n;
     const d = dayKey();
     s.days[d] = (s.days[d] || 0) + n;
+    const c = mine(s);
+    c.xp += n;
+    c.days[d] = (c.days[d] || 0) + n;
     touchStreak();
     save();
     JT.emit('xp', n);
@@ -196,15 +230,21 @@
   }
 
   function recordAnswer(ok) {
+    const c = mine(JT.state);
     JT.state.stats.answered++;
-    if (ok) JT.state.stats.correct++;
+    c.answered++;
+    if (ok) { JT.state.stats.correct++; c.correct++; }
   }
 
+  // A reset or an imported file starts a new history (resetAt), which syncing passes on to other devices.
   function reset() {
-    const keepSettings = JT.state.settings, keepName = JT.state.name;
+    const keepSettings = JT.state.settings, keepName = JT.state.name, keepNameAt = JT.state.nameAt;
     JT.state = fresh();
     JT.state.settings = keepSettings;
     JT.state.name = keepName;
+    if (keepNameAt) JT.state.nameAt = keepNameAt;
+    JT.state.contrib = {};
+    JT.state.resetAt = Date.now();
     save(true);
   }
 
@@ -212,15 +252,15 @@
     const data = JSON.parse(text);
     if (!data || typeof data !== 'object' || !data.srs || !data.settings) throw new Error('Not a Nihongo Michi progress file');
     const keepName = JT.state.name;
-    JT.state = Object.assign(fresh(), data);
-    JT.state.settings = Object.assign({}, DEFAULT_SETTINGS, data.settings);
+    JT.state = normalize(data);
     JT.state.name = keepName;
+    JT.state.resetAt = Date.now();
     save(true);
   }
 
   JT.Store = {
     init, listProfiles, openProfile, createProfile, renameProfile, deleteProfile, closeProfile,
     currentProfile: () => current,
-    save, addXP, dayKey, currentStreak, recordAnswer, reset, importJson, DEFAULT_SETTINGS
+    save, addXP, dayKey, currentStreak, recordAnswer, reset, importJson, summary, deviceId, normalize, DEFAULT_SETTINGS
   };
 })();

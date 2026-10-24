@@ -25,7 +25,7 @@
     return h('div.banner', { style: { marginTop: '14px' } },
       h('div.big', '🔈'),
       h('div.grow', h('b', 'Turn on Japanese audio (free, 2 minutes)'),
-        h('div.small', 'Windows needs its Japanese voice installed: Settings → Time & language → Speech → Add voices → Japanese. Then restart this app.')),
+        h('div.small', JT.Audio.voiceHelp().short)),
       window.api ? h('button.btn', { type: 'button', onclick: () => window.api.openSpeechSettings() }, 'Open Speech settings') : null,
       h('button.btn.ghost', { type: 'button', onclick: () => JT.go('settings') }, 'Details'));
   }
@@ -48,6 +48,12 @@
     pg.appendChild(hero);
     const ab = audioBanner();
     if (ab) pg.appendChild(ab);
+    const sync = JT.Sync.status[JT.Store.currentProfile()];
+    if (sync && sync.state === 'signin' && JT.Google.email(JT.Store.currentProfile())) {
+      pg.appendChild(h('div.banner.blue', { style: { marginTop: '14px' } }, h('div.big', '☁️'),
+        h('div.grow', h('b', 'Sync is paused'), h('div.small', 'Sign in to Google again so this ' + JT.platform.device + ' and your other devices share progress.')),
+        h('button.btn.blue', { type: 'button', onclick: () => JT.Google.signIn(JT.Store.currentProfile(), 'sync').then(() => JT.Sync.now()).then(() => JT.go('home')).catch(e => JT.ui.toast(e.message)) }, 'Sign in')));
+    }
     if (!st.placement && !Object.keys(st.lessons).length) {
       pg.appendChild(h('div.banner.blue', { style: { marginTop: '14px' } }, h('div.big', '🧭'),
         h('div.grow', h('b', 'Studied Japanese before?'), h('div.small', 'Take the adaptive placement test (5–15 minutes) to jump straight to your level.')),
@@ -90,11 +96,11 @@
     const path = h('div.card');
     for (const L of JT.LEVELS) {
       const done = R.levelLessonsDone(L.n), tot = L.lessons.length;
-      path.appendChild(h('div.row', { style: { padding: '6px 0', cursor: 'pointer' }, onclick: () => JT.go('course', { level: L.n }) },
+      path.appendChild(h('div.row', { style: { padding: '6px 0', cursor: 'pointer', flexWrap: 'nowrap' }, onclick: () => JT.go('course', { level: L.n }) },
         h('span.pill' + (done === tot ? '.green' : R.levelUnlocked(L.n) ? '.blue' : ''), { style: { minWidth: '62px', justifyContent: 'center' } }, L.tag),
-        h('div', { style: { width: '220px' } }, L.title),
+        h('div', { style: { flex: '0 1 220px', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }, L.title),
         h('div.bar.grow' + (done === tot ? '.green' : ''), h('i', { style: { width: (tot ? done / tot * 100 : 0) + '%' } })),
-        h('span.small.muted', { style: { width: '60px', textAlign: 'right' } }, `${done}/${tot}`)));
+        h('span.small.muted', { style: { flex: 'none', minWidth: '40px', textAlign: 'right' } }, `${done}/${tot}`)));
     }
     pg.appendChild(path);
     return pg;
@@ -242,15 +248,20 @@
     };
     pg.appendChild(h('h2', { style: { marginTop: 0 } }, 'Learner'));
     pg.appendChild(h('div.card.flat', { style: { padding: 0 } },
-      row('Name', 'Each learner on this computer has their own progress. Japanese will call you ' + (st.name || '…') + 'さん.', nameInp),
+      row('Name', 'Each learner on this ' + JT.platform.device + ' has their own progress. Japanese will call you ' + (st.name || '…') + 'さん.', nameInp),
       row('Switch learner', 'Go back to "Who\'s learning today?"', h('button.btn.sm', { type: 'button', onclick: () => JT.showProfiles() }, 'Switch')),
-      row('Remove this learner', 'Deletes ' + (st.name || 'this learner') + '\'s progress from this computer.', h('button.btn.sm', {
+      row('Remove this learner', 'Deletes ' + (st.name || 'this learner') + '\'s progress from this ' + JT.platform.device + '.', h('button.btn.sm', {
         type: 'button', style: { color: 'var(--bad)' }, onclick: async () => {
-          if (!(await JT.ui.confirmBox('Remove ' + st.name + '?', 'All of ' + st.name + '\'s lessons, reviews, XP and streak will be removed from this computer.', 'Remove'))) return;
+          if (!(await JT.ui.confirmBox('Remove ' + st.name + '?', 'All of ' + st.name + '\'s lessons, reviews, XP and streak will be removed from this ' + JT.platform.device + '.', 'Remove'))) return;
           await JT.Store.deleteProfile(JT.Store.currentProfile());
           JT.showProfiles();
         }
       }, 'Remove'))));
+
+    if (JT.Google.available()) {
+      pg.appendChild(h('h2', 'Sync'));
+      pg.appendChild(syncCard());
+    }
 
     pg.appendChild(h('h2', 'Display'));
     pg.appendChild(h('div.card.flat', { style: { padding: 0 } },
@@ -277,12 +288,9 @@
         row('Test', null, h('button.btn.sm', { type: 'button', onclick: () => JT.Audio.speak('はじめまして。どうぞよろしくお願いします。') }, icon('speaker'), 'Play sample')));
     } else {
       audioCard.appendChild(h('div', { style: { padding: '16px 18px' } },
-        h('div', { style: { fontWeight: 700, marginBottom: '6px' } }, '🔈 No Japanese voice found on this PC'),
+        h('div', { style: { fontWeight: 700, marginBottom: '6px' } }, '🔈 No Japanese voice found on ' + JT.Audio.voiceHelp().where),
         h('ol.small', { style: { lineHeight: 1.8, margin: '6px 0 12px' } },
-          h('li', 'Open Windows Settings → Time & language → Speech.'),
-          h('li', 'Under "Manage voices", click Add voices.'),
-          h('li', 'Search for Japanese, tick "Japanese (Japan)" and click Add.'),
-          h('li', 'Once it has installed, click "Check again" below (or restart the app).')),
+          JT.Audio.voiceHelp().steps.map(s => h('li', s))),
         h('div.row', window.api ? h('button.btn.blue', { type: 'button', onclick: () => window.api.openSpeechSettings() }, 'Open Speech settings') : null,
           h('button.btn', { type: 'button', onclick: async () => { const ok = await JT.Audio.init(); JT.ui.toast(ok ? 'Japanese voice found! 🎉' : 'Still no Japanese voice — it can take a few minutes to install.'); JT.go('settings'); } }, 'Check again'))));
     }
@@ -336,6 +344,65 @@
   }
 
   // ---------------- learner picker ----------------
+  // Settings → Sync: connect this learner to their Google Drive so the computer and phone share progress.
+  let syncListener = null;
+  function syncCard() {
+    const id = JT.Store.currentProfile(), st = JT.state;
+    const card = h('div.card.flat', { style: { padding: 0 } });
+    const connect = async () => {
+      try {
+        await JT.Google.signIn(id, 'sync');   // the web app leaves the page here and comes back synced
+        const r = await JT.Sync.now();
+        JT.ui.toast(r.ok ? '✓ Connected — ' + st.name + '\'s progress is now in Google Drive' : 'Connected, but syncing failed: ' + (r.error ? r.error.message : r.reason));
+      } catch (e) { JT.ui.toast(e.message); }
+      draw();
+    };
+    function draw() {
+      JT.ui.clear(card);
+      const email = JT.Google.email(id), s = JT.Sync.status[id] || {};
+      if (!email) {
+        card.append(h('div.list-row',
+          h('div.grow', h('div', { style: { fontWeight: 600 } }, 'Sync with Google Drive'),
+            h('div.small.muted', 'Keep ' + st.name + '\'s progress the same on your computer and phone. It is stored in a private app folder in your own Google Drive that only Nihongo Michi can see.')),
+          h('button.btn.sm.blue', { type: 'button', onclick: connect }, googleMark(), 'Connect')));
+        return;
+      }
+      const line = s.state === 'syncing' ? 'Syncing…'
+        : s.state === 'signin' ? 'Paused — sign in to Google again to keep syncing.'
+          : s.state === 'error' ? 'Last sync failed: ' + (s.msg || 'unknown error')
+            : s.at ? 'Last synced ' + agoText(s.at) : 'Syncs automatically while you study.';
+      card.append(
+        h('div.list-row',
+          h('div.grow', h('div', { style: { fontWeight: 600 } }, 'Connected as ' + email),
+            h('div.small' + (s.state === 'error' || s.state === 'signin' ? '' : '.muted'), { style: s.state === 'error' || s.state === 'signin' ? { color: 'var(--bad)' } : {} }, line)),
+          s.state === 'signin'
+            ? h('button.btn.sm.blue', { type: 'button', onclick: connect }, 'Sign in again')
+            : h('button.btn.sm', { type: 'button', disabled: s.state === 'syncing', onclick: async () => {
+              const r = await JT.Sync.now({ renew: true });
+              JT.ui.toast(r.ok ? '✓ Synced' : r.reason === 'signin' ? 'Please sign in to Google again.' : 'Sync failed: ' + (r.error ? r.error.message : r.reason));
+            } }, icon('review'), 'Sync now')),
+        h('div.list-row',
+          h('div.grow', h('div', { style: { fontWeight: 600 } }, 'Disconnect'),
+            h('div.small.muted', 'Stops syncing on this ' + JT.platform.device + '. The copy in Google Drive stays, so your other devices keep it.')),
+          h('button.btn.sm', { type: 'button', onclick: async () => {
+            if (!(await JT.ui.confirmBox('Disconnect Google Drive?', st.name + '\'s progress stays on this ' + JT.platform.device + ' and in Google Drive, but they won\'t sync any more.', 'Disconnect'))) return;
+            await JT.Google.signOut(id);
+            delete JT.Sync.status[id];
+            draw();
+          } }, 'Disconnect')));
+    }
+    if (syncListener) JT.off('sync-status', syncListener);
+    syncListener = e => { if (e.id === id && card.isConnected) draw(); };
+    JT.on('sync-status', syncListener);
+    draw();
+    return card;
+  }
+
+  function agoText(t) {
+    const mins = Math.floor((Date.now() - t) / 60000), days = Math.floor((Date.now() - t) / JT.SRS.DAY);
+    return mins < 1 ? 'just now' : mins < 60 ? mins + ' min ago' : days <= 0 ? 'today' : days === 1 ? 'yesterday' : days + ' days ago';
+  }
+
   function lastUsedText(t) {
     if (!t) return '';
     const days = Math.floor((Date.now() - t) / JT.SRS.DAY);
@@ -350,7 +417,7 @@
       h('div.logo', { style: { margin: '0 auto 14px', width: '68px', height: '68px', fontSize: '38px' } }, '道'),
       h('div.jp.muted', profiles.length ? '今日は誰が勉強しますか？' : 'ようこそ！'),
       h('h1', profiles.length ? 'Who\'s learning today?' : 'Welcome to Nihongo Michi'),
-      h('p.muted', profiles.length ? 'Each learner keeps their own lessons, reviews and streak.' : 'Real-world Japanese from zero to JLPT N1. First, tell us your name — everyone who uses this computer gets their own progress.'));
+      h('p.muted', profiles.length ? 'Each learner keeps their own lessons, reviews and streak.' : 'Real-world Japanese from zero to JLPT N1. First, tell us your name — everyone who uses this ' + JT.platform.device + ' gets their own progress.'));
 
     const grid = h('div.profile-grid');
     for (const p of profiles) {
@@ -392,13 +459,79 @@
     };
     if (profiles.length) {
       addCard.classList.add('click');
-      addCard.append(h('div.plus', '+'), h('div.pname', 'Add a learner'), h('div.pmeta', 'Someone else using this computer?'));
+      addCard.append(h('div.plus', '+'), h('div.pname', 'Add a learner'), h('div.pmeta', 'Someone else using this ' + JT.platform.device + '?'));
       addCard.onclick = () => { if (!addCard.contains(nameInp)) showForm(); };
     } else showForm();
     grid.appendChild(addCard);
     if (!profiles.length) { grid.style.gridTemplateColumns = 'minmax(260px, 340px)'; grid.style.justifyContent = 'center'; }
     pg.appendChild(grid);
+
+    // bring a learner over from another device through Google Drive
+    if (JT.Google.available()) {
+      const btn = h('button.btn', { type: 'button' }, googleMark(), 'Continue with Google');
+      btn.onclick = async () => {
+        btn.disabled = true;
+        try {
+          await JT.Google.signIn('pending', 'restore');   // the web app leaves the page here
+          V.restoreFromGoogle('pending');
+        } catch (e) { JT.ui.toast(e.message); }
+        btn.disabled = false;
+      };
+      pg.appendChild(h('div.card.flat', { style: { marginTop: '22px', textAlign: 'center' } },
+        h('div', { style: { fontWeight: 700 } }, 'Learning on another device too?'),
+        h('p.small.muted', { style: { margin: '4px 0 12px' } }, 'Sign in with Google to bring your progress here. It syncs through your own Google Drive.'),
+        btn));
+    }
+    const tip = V.installTip();
+    if (tip) pg.appendChild(tip);
     return pg;
+  };
+
+  const googleMark = () => h('span', { html: '<svg viewBox="0 0 48 48" width="18" height="18"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>', style: { display: 'inline-flex' } });
+
+  // Learners found in the Google account's Drive, to restore on this device.
+  V.restoreFromGoogle = async function (key) {
+    let m, chosen = false;
+    const body = h('div', h('p.muted', 'Looking for your progress in Google Drive…'));
+    m = JT.ui.modal([h('h2', 'Your learners in Google Drive'), body], { onClose: () => { if (!chosen) JT.Google.signOut(key); } });
+    let list;
+    try { list = await JT.Sync.remoteLearners(key); }
+    catch (e) { JT.ui.clear(body); body.append(h('p', 'Could not read Google Drive: ' + e.message)); return; }
+    JT.ui.clear(body);
+    if (!list.length) {
+      body.append(h('p', 'There\'s no Nihongo Michi progress in ' + (JT.Google.email(key) || 'this Google account') + ' yet.'),
+        h('p.small.muted', 'On the device where you\'ve been learning, open Settings → Sync and connect the same Google account. Then try again here.'),
+        h('div.row', { style: { justifyContent: 'flex-end' } }, h('button.btn', { type: 'button', onclick: () => m.close() }, 'Close')));
+      return;
+    }
+    body.append(h('p.small.muted', { style: { marginTop: 0 } }, (JT.Google.email(key) ? 'Signed in as ' + JT.Google.email(key) + '. ' : '') + 'Choose the learner to continue as:'));
+    for (const d of list) {
+      const s = d.summary || {};
+      const b = h('button.btn.primary.sm', { type: 'button' }, 'Continue');
+      b.onclick = async () => {
+        b.disabled = true;
+        chosen = true;
+        try { await JT.Sync.restore(key, d); m.close(); JT.ui.toast('✓ Welcome back, ' + d.name + '! Your progress will keep syncing.'); }
+        catch (e) { chosen = false; b.disabled = false; JT.ui.toast(e.message); }
+      };
+      body.appendChild(h('div.list-row', JT.ui.avatar(d.name, 40),
+        h('div.grow', h('b', d.name), h('div.small.muted', [s.level, s.xp != null ? s.xp + ' XP' : '', 'synced ' + agoText(d.savedAt)].filter(Boolean).join(' · '))),
+        b));
+    }
+  };
+
+  // Web app in a browser tab: how to put it on the home screen (it then opens full screen and works offline).
+  V.installTip = function () {
+    const P = JT.platform;
+    if (P.desktop || P.standalone || !/^https?:$/.test(location.protocol)) return null;
+    let how;
+    if (P.ios) how = h('span', 'Tap the Share button ', h('b', '⬆'), ' then ', h('b', 'Add to Home Screen'), '.');
+    else if (JT.installPrompt) how = h('button.btn.sm.blue', { type: 'button', onclick: async () => { JT.installPrompt.prompt(); await JT.installPrompt.userChoice; JT.installPrompt = null; } }, 'Install app');
+    else if (P.android) how = h('span', 'Open the browser menu ', h('b', '⋮'), ' and choose ', h('b', 'Install app'), ' or ', h('b', 'Add to Home screen'), '.');
+    else return null;
+    return h('div.card.flat.install-tip', { style: { marginTop: '16px' } },
+      h('img', { src: 'icons/icon-192.png', alt: '', width: 44, height: 44, style: { borderRadius: '11px' } }),
+      h('div.grow.small', h('b', 'Install Nihongo Michi on this ' + P.device), h('div.muted', 'It opens full screen and works offline. '), how));
   };
 
   // ---------------- onboarding ----------------

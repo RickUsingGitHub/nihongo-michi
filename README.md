@@ -20,6 +20,26 @@ unzip it anywhere and run **Nihongo Michi.exe**. There's nothing to install.
 
 Progress is saved per learner in `%APPDATA%\Nihongo Michi\profiles`, so several people can share one PC.
 
+## On your phone
+
+Open **<https://rickusinggithub.github.io/nihongo-michi/>** on your iPhone or Android phone and add it to your
+home screen. It then opens full screen like an app and works offline.
+
+- **iPhone (Safari):** tap Share ⬆ → *Add to Home Screen*.
+- **Android (Chrome):** tap *Install app* in the app, or the ⋮ menu → *Install app*.
+- **Japanese voice:** iPhones: Settings → Accessibility → Spoken Content → Voices → Japanese. Android: Settings →
+  Languages & input → Text-to-speech → install Japanese voice data.
+
+## Syncing between PC and phone
+
+Each learner can connect their own Google account under **Settings → Sync**. Progress is then kept in a private
+app folder in that learner's Google Drive that only Nihongo Michi can see, and it syncs automatically while they
+study. On a new device, choose **Continue with Google** on the "Who's learning today?" screen to bring a learner over.
+
+Practice done on both devices adds up: lessons and tests keep the best result, each review item keeps its most
+recent review, and XP and streaks count every device. Sync is optional; without it everything stays on the device.
+See [docs/google-setup.md](docs/google-setup.md) for the one-time Google Cloud setup, and [privacy](src/privacy.html).
+
 ## What's inside
 
 | | |
@@ -64,13 +84,18 @@ To build the Windows app into `dist/`:
 npm run package
 ```
 
+The phone version is the same `src/` folder served as a website. To try it locally, serve `src/`
+(for example `python -m http.server 8765 --directory src`) and open <http://localhost:8765>. After changing
+anything in `src/`, run `node tools/build-web.js` to refresh the offline cache list (`src/sw.js`).
+Pushing to `main` publishes it to GitHub Pages (`.github/workflows/pages.yml`).
+
 ### Project layout
 
 ```
-main.js, preload.js   Electron main process: window, learner profiles on disk, speech helper
+main.js, preload.js   Electron main process: window, learner profiles on disk, speech helper, Google sign-in
 tts/tts.ps1           Text-to-speech through the Windows OneCore voices (PowerShell + WinRT)
-src/index.html        The app (plain HTML/CSS/JS, no framework or build step)
-src/lib/              Kana/romaji, furigana markup, storage, spaced repetition, audio, UI helpers
+src/index.html        The app (plain HTML/CSS/JS, no framework or build step); also the phone web app
+src/lib/              Kana/romaji, furigana markup, storage, spaced repetition, audio, Google sign-in, Drive sync
 src/app/              Views: lessons, exercises, role-plays, reviews, placement, library, settings
 src/data/             Course content (course*.js, convos*.js, phrasebook, placement questions)
 src/data/gen/         Word, kanji and stroke data generated from tools/raw
@@ -85,6 +110,7 @@ words, `*…*` marks the grammar point in an example).
 ```bash
 node tools/validate.js     # content: readings, exercises, references
 node tools/test-lib.js     # kana, romaji and markup library
+node tools/test-sync.js    # syncing a PC and a phone through a simulated Google Drive
 node tools/tts-check.js    # speech text for everything the app can say
 ```
 

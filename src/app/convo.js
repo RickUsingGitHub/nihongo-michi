@@ -48,7 +48,7 @@
       h('div.scene-emoji', { style: { width: '44px', height: '44px', fontSize: '24px' } }, c.icon || '💬'),
       h('div.grow', h('div', { style: { fontWeight: 750 } }, c.title), h('div.convo-scene', c.scene)),
       modeSeg, tog('Romaji', 'romaji'), tog('English', 'en'));
-    const wrap = h('div.convo', { style: { height: '100vh' } }, head, chat, optsBox);
+    const wrap = h('div.convo', { style: { height: '100%' } }, head, chat, optsBox);
     main.appendChild(wrap);
     main.scrollTop = 0;
 

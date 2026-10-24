@@ -77,7 +77,7 @@
         const btn = h('button.btn.primary.lg', { type: 'button' }, st.cta || 'Continue', icon('arrow'));
         btn.onclick = next;
         primary = next;
-        setFoot([h('div.grow', h('span.tiny.muted', 'Press ', h('span.kbd', 'Enter'), ' to continue')), btn]);
+        setFoot([h('div.grow', h('span.tiny.muted.kbd-hint', 'Press ', h('span.kbd', 'Enter'), ' to continue')), btn]);
         return;
       }
       let spec = typeof st.ex === 'function' ? st.ex() : st.ex;
@@ -96,7 +96,7 @@
       } else {
         primary = null;
         skipBtn.onclick = () => onAnswer(st, spec, { correct: false, skipped: true });
-        setFoot([skipBtn, h('div.grow'), h('span.tiny.muted', spec.kind === 'choice' ? 'Press 1–4 to answer' : '')]);
+        setFoot([skipBtn, h('div.grow'), h('span.tiny.muted.kbd-hint', spec.kind === 'choice' ? 'Press 1–4 to answer' : '')]);
       }
     }
 

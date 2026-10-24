@@ -2,9 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; connect-src 'self' https://www.googleapis.com https://oauth2.googleapis.com">
   <title>Nihongo Michi</title>
+  <meta name="description" content="Learn real-world Japanese from zero to JLPT N1.">
+  <meta name="theme-color" content="#1e2230">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Michi">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/png" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -21,16 +30,21 @@
       <div class="side-foot" id="side-foot"></div>
     </nav>
     <main id="main"></main>
+    <nav id="tabbar"></nav>
   </div>
   <div id="modal-root"></div>
   <div id="toast-root"></div>
 
   <!-- core libraries -->
+  <script src="config.js"></script>
+  <script src="lib/platform.js"></script>
   <script src="lib/kana.js"></script>
   <script src="lib/text.js"></script>
   <script src="lib/store.js"></script>
   <script src="lib/srs.js"></script>
   <script src="lib/audio.js"></script>
+  <script src="lib/google.js"></script>
+  <script src="lib/sync.js"></script>
   <script src="lib/ui.js"></script>
   <script src="app/registry.js"></script>
 

@@ -12,7 +12,7 @@
   "private": true,
   "scripts": {
     "start": "electron .",
-    "package": "electron-packager . \"Nihongo Michi\" --platform=win32 --arch=x64 --out=dist --overwrite --icon=assets/icon.ico --ignore=^/dist --ignore=^/tools --ignore=^/.claude --ignore=^/docs --ignore=autoplay-test.js"
+    "package": "electron-packager . \"Nihongo Michi\" --platform=win32 --arch=x64 --out=dist --overwrite --icon=assets/icon.ico --ignore=^/dist --ignore=^/tools --ignore=^/.claude --ignore=^/docs --ignore=^/.github --ignore=autoplay-test.js"
   },
   "devDependencies": {
     "@electron/packager": "20.3.0",
