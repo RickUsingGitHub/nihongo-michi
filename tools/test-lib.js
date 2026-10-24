@@ -1,0 +1,57 @@
+// Quick checks for the text libraries: node tools/test-lib.js
+const vm = require('vm');
+const fs = require('fs');
+const path = require('path');
+const ctx = { window: {}, console };
+ctx.window.window = ctx.window;
+vm.createContext(ctx.window);
+for (const f of ['kana.js', 'text.js']) vm.runInContext(fs.readFileSync(path.join(__dirname, '..', 'src', 'lib', f), 'utf8'), ctx.window);
+const { Kana: K, T } = ctx.window.JT;
+let fails = 0;
+const eq = (got, want, label) => {
+  if (got !== want) { fails++; console.log('FAIL', label, JSON.stringify(got), '!=', JSON.stringify(want)); }
+};
+eq(K.toRomaji('とうきょう'), 'toukyou', 'tokyo');
+eq(K.toRomaji('がっこう'), 'gakkou', 'gakkou');
+eq(K.toRomaji('まっちゃ'), 'matcha', 'matcha');
+eq(K.toRomaji('こんや'), "kon'ya", 'konya');
+eq(K.toRomaji('コーヒー'), 'koohii', 'coffee');
+eq(K.toRomaji('パーティー'), 'paatii', 'party');
+eq(K.romajiToKana('konnichiha', { final: true }), 'こんにちは', 'ime konnichiha');
+eq(K.romajiToKana('konnnichiha', { final: true }), 'こんにちは', 'ime konnnichiha');
+eq(K.romajiToKana('gakkou', { final: true }), 'がっこう', 'ime gakkou');
+eq(K.romajiToKana('matcha', { final: true }), 'まっちゃ', 'ime matcha');
+eq(K.romajiToKana('kan', {}), 'かn', 'ime pending n');
+eq(K.romajiToKana('kann', {}), 'かnn', 'ime pending nn');
+eq(K.romajiToKana('kanji', { final: true }), 'かんじ', 'ime kanji');
+eq(K.romajiToKana('shinbun', { final: true }), 'しんぶん', 'ime shinbun');
+eq(K.romajiToKana('kya', {}), 'きゃ', 'ime kya');
+eq(K.romajiToKana('ky', {}), 'ky', 'ime pending ky');
+eq(K.romajiToKana('ko-hi-', { final: true, katakana: true }), 'コーヒー', 'ime katakana');
+eq(K.phonetic('わたしは がくせいです'), K.phonetic('watashi wa gakusei desu'), 'phonetic particle');
+eq(K.phonetic('とうきょう'), K.phonetic('tookyoo'), 'phonetic long');
+eq(K.phonetic('コーヒー'), K.phonetic('こおひい'), 'phonetic katakana');
+eq(T.surface('私[わたし] は 学生[がくせい] です。'), '私は学生です。', 'surface');
+eq(T.reading('食[た]べ物[もの]'), 'たべもの', 'reading');
+eq(T.romaji('私[わたし] は 学生[がくせい] です か。'), 'Watashi wa gakusei desu ka.', 'romaji sentence');
+eq(T.romaji('こんにちは'), 'konnichiwa', 'romaji konnichiwa');
+eq(T.romaji('駅[えき] へ 行[い]きます。'), 'Eki e ikimasu.', 'romaji he');
+eq(T.romaji('水[みず] を ください'), 'mizu o kudasai', 'romaji wo');
+eq(T.romaji('一人[ひとり]っ子[こ]'), 'hitorikko', 'romaji sokuon across segments');
+// speech: only the words in JT.TTS_FIX get the course reading, the rest keep their kanji
+ctx.window.JT.TTS_FIX = new Set(['見える|みえる', '音|おと']);
+const SP = '<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="ja-JP">';
+eq(T.ttsSsml('山[やま] が 見[み]える。'), SP + '山が<sub alias="みえる">見える</sub>。</speak>', 'ssml fixes misread word');
+eq(T.ttsSsml('「音[おと]」'), SP + '「<sub alias="おと">音</sub>」</speak>', 'ssml keeps punctuation outside');
+eq(T.ttsSsml('私[わたし] は 学生[がくせい] です。'), '', 'ssml not needed');
+eq(T.ttsSsml('私[わたし] は *学生[がくせい]* です。', true), SP + '<sub alias="わたし">私</sub>は<sub alias="がくせい">学生</sub>です。</speak>', 'ssml all words');
+eq(T.ttsToken(T.parse('～建[だ]て')[0]).key, '建て|だて', 'tts token strips ～');
+eq(T.ttsReading('{2,000円|にせんえん} です。'), 'にせんえんです。', 'tts reading text');
+eq(T.surface('{お金持ち|おかねもち}'), 'お金持ち', 'explicit base');
+eq(T.reading('4時[よじ] 半[はん]'), 'よじはん', 'digits base');
+eq(T.html('お茶[ちゃ]', { furigana: 'always' }), 'お<ruby>茶<rt>ちゃ</rt></ruby>', 'html');
+eq(T.surface('財布[さいふ] を 忘[わす]れて *しまいました*。'), '財布を忘れてしまいました。', 'targets');
+const sp = T.splitTarget('財布[さいふ] を 忘[わす]れて *しまいました*。');
+eq(sp.target, 'しまいました', 'split target');
+eq(T.html('IC[アイシー] カード', { furigana: 'always' }), '<ruby>IC<rt>アイシー</rt></ruby>カード', 'latin base');
+console.log(fails ? fails + ' failures' : 'all passed');

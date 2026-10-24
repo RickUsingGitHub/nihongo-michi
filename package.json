@@ -1,0 +1,21 @@
+{
+  "name": "nihongo-michi",
+  "productName": "Nihongo Michi",
+  "version": "1.0.0",
+  "description": "Nihongo Michi - learn real-world Japanese from zero to JLPT N1 (Windows desktop app)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/RickUsingGitHub/nihongo-michi.git"
+  },
+  "main": "main.js",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "package": "electron-packager . \"Nihongo Michi\" --platform=win32 --arch=x64 --out=dist --overwrite --icon=assets/icon.ico --ignore=^/dist --ignore=^/tools --ignore=^/.claude --ignore=^/docs --ignore=autoplay-test.js"
+  },
+  "devDependencies": {
+    "@electron/packager": "20.3.0",
+    "electron": "45.0.0"
+  }
+}

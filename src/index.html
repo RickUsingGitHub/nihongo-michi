@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:">
+  <title>Nihongo Michi</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app">
+    <nav id="sidebar">
+      <div class="brand">
+        <div class="logo">道</div>
+        <div>
+          <div class="brand-name">Nihongo Michi</div>
+          <div class="brand-sub">日本語の道 · Zero → N1</div>
+        </div>
+      </div>
+      <div id="nav"></div>
+      <div class="side-foot" id="side-foot"></div>
+    </nav>
+    <main id="main"></main>
+  </div>
+  <div id="modal-root"></div>
+  <div id="toast-root"></div>
+
+  <!-- core libraries -->
+  <script src="lib/kana.js"></script>
+  <script src="lib/text.js"></script>
+  <script src="lib/store.js"></script>
+  <script src="lib/srs.js"></script>
+  <script src="lib/audio.js"></script>
+  <script src="lib/ui.js"></script>
+  <script src="app/registry.js"></script>
+
+  <!-- generated datasets (see tools/build-data.js) -->
+  <script src="data/gen/vocab.js"></script>
+  <script src="data/gen/kanjidb.js"></script>
+  <script src="data/gen/strokes.js"></script>
+
+  <!-- course content -->
+  <script src="data/kana.js"></script>
+  <script src="data/kanji-notes.js"></script>
+  <script src="data/course0.js"></script>
+  <script src="data/course1.js"></script>
+  <script src="data/course2.js"></script>
+  <script src="data/course3.js"></script>
+  <script src="data/course4.js"></script>
+  <script src="data/course5.js"></script>
+  <script src="data/course6.js"></script>
+  <script src="data/course7.js"></script>
+  <script src="data/course8.js"></script>
+  <script src="data/course9.js"></script>
+  <script src="data/convos0.js"></script>
+  <script src="data/convos1.js"></script>
+  <script src="data/convos2.js"></script>
+  <script src="data/convos3.js"></script>
+  <script src="data/convos4.js"></script>
+  <script src="data/convos5.js"></script>
+  <script src="data/convos6.js"></script>
+  <script src="data/phrasebook.js"></script>
+  <script src="data/placement.js"></script>
+  <script src="data/tts-fix.js"></script>
+
+  <!-- app -->
+  <script src="app/exercises.js"></script>
+  <script src="app/cards.js"></script>
+  <script src="app/lesson.js"></script>
+  <script src="app/review.js"></script>
+  <script src="app/convo.js"></script>
+  <script src="app/placement.js"></script>
+  <script src="app/views.js"></script>
+  <script src="app/library.js"></script>
+  <script src="app/main.js"></script>
+</body>
+</html>
