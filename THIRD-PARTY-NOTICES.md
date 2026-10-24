@@ -1,6 +1,9 @@
 # Third-party data
 
-Nihongo Michi bundles open data. The raw downloads live in `tools/raw/` and
+The MIT licence in [LICENSE](LICENSE) covers the app's code and its original course content
+(lessons, dialogues, role-plays, grammar notes, kanji memory hooks and placement test).
+
+Nihongo Michi also bundles open data. The raw downloads live in `tools/raw/` and
 `tools/build-data.js` turns them into the files in `src/data/gen/`. Those files
 stay under the licences below (the share-alike licences apply to the data and
 anything derived from it, not to the app's code).

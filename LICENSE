@@ -19,10 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
----------------------------------------------------------------------------
-
-This licence covers the app's code and its original course content (lessons,
-dialogues, role-plays, grammar notes, kanji memory hooks and placement test).
-The open datasets in tools/raw and the files generated from them in
-src/data/gen keep their own licences — see THIRD-PARTY-NOTICES.md.
