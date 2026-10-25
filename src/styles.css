@@ -494,6 +494,10 @@ table.tbl td, table.tbl th { padding: 8px 10px; border-bottom: 1px solid var(--l
 .passage { font-size: 19px; line-height: 2.1; padding: 22px 26px; }
 
 .jpt ruby.nf.peek rt { visibility: visible; }
+.boot-note { max-width: 640px; margin: 80px auto; padding: 0 20px; text-align: center; color: var(--muted); }
+.boot-note h1 { color: var(--ink); }
+.site-links { margin-top: 26px; font-size: 13px; color: var(--muted); }
+.site-links a { color: var(--muted); }
 .install-tip { display: flex; gap: 12px; align-items: center; text-align: left; }
 
 @media (max-width: 1000px) {

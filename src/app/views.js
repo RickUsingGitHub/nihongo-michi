@@ -485,6 +485,11 @@
     }
     const tip = V.installTip();
     if (tip) pg.appendChild(tip);
+    // the web app's front door: Google's sign-in review expects a visible privacy policy link here
+    if (JT.platform.web && /^https?:$/.test(location.protocol)) {
+      pg.appendChild(h('div.site-links', h('a', { href: 'privacy.html' }, 'Privacy policy'), ' · ',
+        h('a', { href: 'https://github.com/RickUsingGitHub/nihongo-michi', target: '_blank', rel: 'noopener' }, 'Source code')));
+    }
     return pg;
   };
 
