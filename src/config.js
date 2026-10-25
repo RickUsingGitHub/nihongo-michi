@@ -4,5 +4,5 @@
  * Client IDs are public by design, so this file is safe to publish. */
 window.JT = window.JT || {};
 JT.CONFIG = {
-  googleWebClientId: ''
+  googleWebClientId: '586429706656-lsimho9deqb8htl0l6a5ca70aprnh5mf.apps.googleusercontent.com'
 };
