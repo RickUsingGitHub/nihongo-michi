@@ -40,11 +40,12 @@
     const goal = st.settings.dailyGoal || 50;
     const pg = h('div.page');
     const lvl = next ? next.lv : JT.LEVELS[JT.LEVELS.length - 1];
-    const hero = h('div.hero',
+    const hero = h('div.hero.with-mascot',
       h('div.hero-jp', jp + (st.name ? '、' + st.name + 'さん' : '') + '！'),
       h('h1', next ? (Object.keys(st.lessons).length ? 'Ready for your next step?' : 'Your journey to fluent Japanese starts here') : 'You have completed the whole course! 🏆'),
       h('div', { style: { opacity: 0.85 } }, next ? `${lvl.title} · ${lvl.tag} — Lesson ${next.index + 1}: ${next.title}` : 'Keep your reviews going and try the JLPT mock exams.'),
-      next ? h('button.btn.primary.lg', { type: 'button', onclick: () => JT.Lesson.start(next) }, icon('play'), Object.keys(st.lessons).length ? 'Continue learning' : 'Start lesson 1') : null);
+      next ? h('button.btn.primary.lg', { type: 'button', onclick: () => JT.Lesson.start(next) }, icon('play'), Object.keys(st.lessons).length ? 'Continue learning' : 'Start lesson 1') : null,
+      h('img.hero-mascot', { src: 'img/tabi.webp', alt: '', draggable: 'false' }));
     pg.appendChild(hero);
     const ab = audioBanner();
     if (ab) pg.appendChild(ab);
@@ -414,7 +415,7 @@
     const profiles = ix.profiles.slice().sort((a, b) => (b.lastUsed || 0) - (a.lastUsed || 0));
     const pg = h('div.profile-screen');
     pg.append(
-      h('div.logo', { style: { margin: '0 auto 14px', width: '68px', height: '68px', fontSize: '38px' } }, '道'),
+      JT.ui.mascot({ size: 150 }),
       h('div.jp.muted', profiles.length ? '今日は誰が勉強しますか？' : 'ようこそ！'),
       h('h1', profiles.length ? 'Who\'s learning today?' : 'Welcome to Nihongo Michi'),
       h('p.muted', profiles.length ? 'Each learner keeps their own lessons, reviews and streak.' : 'Real-world Japanese from zero to JLPT N1. First, tell us your name — everyone who uses this ' + JT.platform.device + ' gets their own progress.'));
@@ -546,7 +547,7 @@
       else JT.go('home');
     };
     m = JT.ui.modal([
-      h('div.center', h('div.logo', { style: { margin: '0 auto 12px', width: '64px', height: '64px', fontSize: '36px' } }, '道'),
+      h('div.center', JT.ui.mascot({ size: 120, say: [['はじめまして！', 'タビ です。'], 'Hi, I\'m Tabi! I\'ll walk the road to Japanese with you.'] }),
         h('div.jp.muted', 'ようこそ、' + JT.state.name + 'さん！'), h('h2', { style: { margin: '4px 0 6px' } }, 'Welcome to Nihongo Michi, ' + JT.state.name)),
       h('p.muted', { style: { textAlign: 'center', marginTop: 0 } }, 'Real-world Japanese from zero to JLPT N1.'),
       h('ul.goal-list.small',

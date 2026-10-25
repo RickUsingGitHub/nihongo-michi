@@ -1,9 +1,14 @@
 # Nihongo Michi 日本語の道
 
-A free Windows desktop app that teaches Japanese from zero to JLPT N1, with the emphasis on
-real-world, conversational Japanese. You start by surviving a trip to Japan (ordering ramen,
-asking for directions, paying) and work up through the JLPT levels with grammar, reading,
+<img src="src/img/tabi.webp" align="right" height="190" alt="Tabi the tanuki">
+
+A free app for Windows, iPhone and Android that teaches Japanese from zero to JLPT N1, with the
+emphasis on real-world, conversational Japanese. You start by surviving a trip to Japan (ordering
+ramen, asking for directions, paying) and work up through the JLPT levels with grammar, reading,
 kanji and plenty of role-play conversations along the way.
+
+Your guide on the road (*michi*) is **Tabi** (旅, "journey"), a travelling tanuki with a straw hat and
+the leaf tanuki use for their shape-shifting tricks.
 
 ![Home screen](docs/screenshots/home.png)
 
@@ -29,6 +34,12 @@ home screen. It then opens full screen like an app and works offline.
 - **Android (Chrome):** tap *Install app* in the app, or the ⋮ menu → *Install app*.
 - **Japanese voice:** iPhones: Settings → Accessibility → Spoken Content → Voices → Japanese. Android: Settings →
   Languages & input → Text-to-speech → install Japanese voice data.
+
+<p>
+  <img src="docs/screenshots/phone-home.png" width="260" alt="Home screen on a phone">
+  &nbsp;
+  <img src="docs/screenshots/phone-lesson-done.png" width="260" alt="Lesson complete on a phone">
+</p>
 
 ## Syncing between PC and phone
 

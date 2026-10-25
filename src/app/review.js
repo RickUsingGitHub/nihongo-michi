@@ -25,7 +25,7 @@
         const up = res.results.filter(r => r.correct).length;
         JT.ui.clear(stage);
         stage.appendChild(h('div.done-wrap',
-          h('div.big-emoji', res.score >= 0.9 ? '🌸' : res.score >= 0.7 ? '👍' : '📚'),
+          JT.ui.mascot({ size: 120, say: res.score >= 0.9 ? ['かんぺき！', 'Perfect memory!'] : res.score >= 0.7 ? ['おつかれさま！', 'Nice work — see you next review.'] : ['だいじょうぶ！', 'No worries — the tricky ones come back sooner.'] }),
           h('h1', 'Review done!'),
           h('div.done-stats',
             h('div.stat', h('b', Math.round(res.score * 100) + '%'), h('span', 'accuracy')),

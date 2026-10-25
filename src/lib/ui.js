@@ -172,6 +172,16 @@
     return { close, el: box };
   }
 
+  // Tabi (旅, "journey") the tanuki, the learner's travel companion on the road to Japanese.
+  // opts.size: height in px; opts.say: [Japanese markup (or an array of lines), English] shown in a speech bubble.
+  function mascot(opts = {}) {
+    const img = h('img.mascot', { src: 'img/tabi.webp', alt: 'Tabi the tanuki', draggable: 'false', style: { height: (opts.size || 140) + 'px' } });
+    if (!opts.say) return img;
+    const [jp, en] = opts.say;
+    const lines = (Array.isArray(jp) ? jp : [jp]).map(l => JT.T.el(l, { furigana: 'always', tag: 'div' }));
+    return h('div.mascot-say', img, h('div.say-bubble', lines, en ? h('div.small.muted', en) : null));
+  }
+
   function confirmBox(title, msg, okLabel = 'OK', cancelLabel = 'Cancel') {
     return new Promise(resolve => {
       let m;
@@ -306,6 +316,6 @@
 
   JT.ui = {
     h, append, clear, icon, ICONS, shuffle, sample, pick, uniqBy, clamp, timeUntil, showRomaji, avatar,
-    sayBtn, recBtn, jpBlock, toast, modal, confirmBox, ring, stars, confetti, xpPop, strokeBox
+    sayBtn, recBtn, jpBlock, toast, modal, confirmBox, ring, stars, confetti, xpPop, strokeBox, mascot
   };
 })();

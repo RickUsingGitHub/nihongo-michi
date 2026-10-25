@@ -301,7 +301,7 @@
     const pct = Math.round(res.score * 100);
     JT.ui.clear(stage);
     stage.appendChild(h('div.done-wrap',
-      h('div.big-emoji', stars === 3 ? '🎉' : stars === 2 ? '😊' : '💪'),
+      JT.ui.mascot({ size: 130, say: stars === 3 ? ['すばらしい！', 'Excellent!'] : stars === 2 ? ['よく できました！', 'Well done!'] : ['がんばりました ね！', 'You stuck with it — that\'s how you learn!'] }),
       h('h1', { style: { margin: '10px 0 4px' } }, 'Lesson complete!'),
       h('div.muted', L.title),
       h('div', { style: { fontSize: '30px', marginTop: '8px' } }, JT.ui.stars(stars)),

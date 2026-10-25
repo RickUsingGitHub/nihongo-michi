@@ -10,7 +10,7 @@ const SRC = path.join(__dirname, '..', 'src');
 const html = fs.readFileSync(path.join(SRC, 'index.html'), 'utf8');
 const refs = [...html.matchAll(/(?:src|href)="([^"#:]+)"/g)].map(m => m[1]);
 const files = ['index.html', ...refs];
-for (const f of fs.readdirSync(path.join(SRC, 'icons'))) files.push('icons/' + f);
+for (const dir of ['icons', 'img']) for (const f of fs.readdirSync(path.join(SRC, dir))) files.push(dir + '/' + f);
 const list = [...new Set(files)].filter(f => fs.existsSync(path.join(SRC, f)));
 const missing = [...new Set(files)].filter(f => !fs.existsSync(path.join(SRC, f)));
 if (missing.length) { console.error('missing files:', missing.join(', ')); process.exit(1); }
