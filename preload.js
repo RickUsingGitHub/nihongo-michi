@@ -15,6 +15,7 @@ contextBridge.exposeInMainWorld('api', {
   ttsVoices: () => ipcRenderer.invoke('tts:voices'),
   ttsSpeak: (text, rate, voice, ssml) => ipcRenderer.invoke('tts:speak', text, rate, voice, ssml),
   openSpeechSettings: () => ipcRenderer.invoke('open:speech-settings'),
+  openPrivacy: () => ipcRenderer.invoke('open:privacy'),
   // Google sign-in for Drive sync (per learner; tokens stay in the main process)
   googleAvailable: () => ipcRenderer.invoke('google:available'),
   googleStatus: id => ipcRenderer.invoke('google:status', id),
