@@ -3,45 +3,85 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Nihongo Michi · Privacy</title>
+  <title>Nihongo Michi · Privacy policy</title>
   <style>
     body { font-family: "Segoe UI", system-ui, sans-serif; background: #f6f1e7; color: #24201b; margin: 0; line-height: 1.6; }
-    main { max-width: 720px; margin: 0 auto; padding: 32px 18px 60px; }
-    h1 { font-size: 26px; margin-bottom: 4px; }
-    h2 { font-size: 18px; margin-top: 28px; }
+    main { max-width: 760px; margin: 0 auto; padding: 32px 18px 60px; }
+    h1 { font-size: 28px; margin-bottom: 4px; }
+    h2 { font-size: 19px; margin-top: 30px; }
     .muted { color: #8b8376; }
     a { color: #2e4a7d; }
+    table { border-collapse: collapse; width: 100%; font-size: 15px; }
+    td, th { text-align: left; vertical-align: top; padding: 8px 10px; border-bottom: 1px solid #e2d9c6; }
   </style>
 </head>
 <body>
 <main>
-  <h1>Privacy</h1>
-  <p class="muted">Nihongo Michi — last updated 25 October 2026</p>
+  <h1>Privacy policy</h1>
+  <p class="muted">Nihongo Michi — last updated 27 October 2026</p>
 
-  <h2>Your progress stays with you</h2>
-  <p>Nihongo Michi has no server and no accounts of its own. Your learners, lessons, reviews and settings are
-  saved on your own device: in the Windows app's data folder on a PC, or in the browser's storage on a phone.</p>
+  <p>Nihongo Michi is a free app for learning Japanese, available as a Windows desktop app and as a web app for
+  phones at <a href="https://rickusinggithub.github.io/nihongo-michi/">rickusinggithub.github.io/nihongo-michi</a>.
+  This policy explains what information the app handles, where it is kept, and what it is used for. In short: your
+  study progress stays on your own devices and, only if you choose, in your own Google Drive. The developer does not
+  run a server and never receives any of your information.</p>
 
-  <h2>Optional Google Drive sync</h2>
-  <p>If you choose <b>Connect</b> under Settings → Sync, the app asks Google for permission to use a private
-  app folder in <b>your own</b> Google Drive (the <code>drive.appdata</code> permission) and to read your email address,
-  which it shows so you know which account is connected. It saves one file per learner there and reads it back
-  on your other devices. The app cannot see any other files in your Drive, and the developer never receives your
-  progress, your email address or your sign-in.</p>
+  <h2>1. Information the app stores on your device</h2>
+  <table>
+    <tr><th>Information</th><th>Why</th><th>Where it is kept</th></tr>
+    <tr><td>The name you give each learner</td><td>To tell learners apart and greet you in lessons</td><td rowspan="3">On your device only: the app's data folder on Windows, or the browser's storage on a phone</td></tr>
+    <tr><td>Study progress: completed lessons, review schedule, XP, streaks, test results</td><td>To run the course and the spaced-repetition reviews</td></tr>
+    <tr><td>Settings such as voice, speed and theme</td><td>To remember your preferences</td></tr>
+  </table>
+  <p>The app has no accounts of its own, no analytics, no advertising and no tracking, and it does not use cookies.
+  The web app is hosted on GitHub Pages; like any website host, GitHub keeps standard server logs (such as IP addresses)
+  under the <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement">GitHub Privacy Statement</a>.</p>
+
+  <h2>2. Google Drive sync (optional)</h2>
+  <p>Sync is off unless you choose <b>Connect</b> under Settings → Sync or <b>Continue with Google</b>. When you do, you
+  sign in with Google and the app asks for these permissions:</p>
+  <table>
+    <tr><th>Permission</th><th>What the app does with it</th></tr>
+    <tr><td>See, create and delete its own configuration data in your Google Drive (<code>drive.appdata</code>)</td>
+      <td>Saves one file per learner, containing that learner's name, progress and settings, in a hidden app folder in
+      <b>your</b> Google Drive, and reads it back on your other devices. The app cannot see, open or change any of your
+      other Drive files.</td></tr>
+    <tr><td>Your email address (<code>openid</code>, <code>email</code>)</td>
+      <td>Shown in the app ("Connected as …") so you know which Google account a learner syncs with. It is not stored
+      anywhere else or used for anything else.</td></tr>
+  </table>
+  <p>Google sign-in tokens are kept only on your device (encrypted by Windows on a PC). The app talks directly to
+  Google; the information goes from your device to your own Google account and nowhere else.</p>
   <p>Nihongo Michi's use and transfer of information received from Google APIs adheres to the
   <a href="https://developers.google.com/terms/api-services-user-data-policy">Google API Services User Data Policy</a>,
-  including the Limited Use requirements. The data is used only to sync your progress between your own devices; it is
-  not shared, sold, used for advertising or used to train AI models.</p>
-  <p>You can stop syncing at any time with <b>Disconnect</b>, remove the app's access to your Google account at
-  <a href="https://myaccount.google.com/permissions">myaccount.google.com/permissions</a>, and delete its hidden
-  data in Google Drive under Settings → Manage apps → Nihongo Michi → Options → Delete hidden app data.</p>
+  including the Limited Use requirements. Google user data is used only to provide sync between your own devices. It is
+  not sold, not shared with anyone, not used for advertising, not read by people, and not used to train AI models.</p>
 
-  <h2>Microphone</h2>
-  <p>The record-and-compare exercises use your microphone only while you are recording. The recording stays on
-  your device and is discarded when you leave the exercise.</p>
+  <h2>3. Microphone and speech</h2>
+  <p>Speaking practice ("record and compare") uses your microphone only while you are recording. The recording stays
+  on your device and is discarded when you leave the exercise. It is never uploaded.</p>
+  <p>Japanese audio is spoken by the voices built into your device. Some browsers also offer online voices; if one is
+  selected, the browser sends the lesson text being spoken (never anything about you) to the browser's maker.</p>
 
-  <h2>Questions</h2>
-  <p>Open an issue at <a href="https://github.com/RickUsingGitHub/nihongo-michi/issues">github.com/RickUsingGitHub/nihongo-michi</a>.</p>
+  <h2>4. Keeping and deleting your information</h2>
+  <ul>
+    <li>Remove a learner from a device: Settings → <b>Remove this learner</b>.</li>
+    <li>Stop syncing: Settings → Sync → <b>Disconnect</b>. This also signs the app out of your Google account on that device.</li>
+    <li>Remove the app's access to your Google account: <a href="https://myaccount.google.com/permissions">myaccount.google.com/permissions</a>.</li>
+    <li>Delete the synced files from Google Drive: in Google Drive, Settings → <b>Manage apps</b> → Nihongo Michi →
+      Options → <b>Delete hidden app data</b>.</li>
+  </ul>
+  <p>Information is kept until you delete it in one of these ways.</p>
+
+  <h2>5. Sharing</h2>
+  <p>Nihongo Michi does not share, sell or transfer any information to anyone. The developer has no access to it.</p>
+
+  <h2>6. Changes</h2>
+  <p>If this policy changes, the new version will be published on this page with a new date.</p>
+
+  <h2>7. Contact</h2>
+  <p>Questions or requests: open an issue at
+  <a href="https://github.com/RickUsingGitHub/nihongo-michi/issues">github.com/RickUsingGitHub/nihongo-michi/issues</a>.</p>
 </main>
 </body>
 </html>
