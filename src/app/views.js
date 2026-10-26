@@ -512,14 +512,41 @@
     let list;
     try { list = await JT.Sync.remoteLearners(key); }
     catch (e) { JT.ui.clear(body); body.append(h('p', 'Could not read Google Drive: ' + e.message)); return; }
+    // learners on this device that aren't in Drive (or connected) yet can be put into it from here too
+    const ix = await JT.Store.listProfiles();
+    const inDrive = new Set(list.map(d => d.id));
+    const local = [];
+    for (const p of ix.profiles) if (!inDrive.has(p.id) && !(await JT.Google.load(p.id))) local.push(p);
     JT.ui.clear(body);
-    if (!list.length) {
-      body.append(h('p', 'There\'s no Nihongo Michi progress in ' + (JT.Google.email(key) || 'this Google account') + ' yet.'),
+    const email = JT.Google.email(key);
+    if (!list.length && !local.length) {
+      body.append(h('p', 'There\'s no Nihongo Michi progress in ' + (email || 'this Google account') + ' yet.'),
         h('p.small.muted', 'On the device where you\'ve been learning, open Settings → Sync and connect the same Google account. Then try again here.'),
         h('div.row', { style: { justifyContent: 'flex-end' } }, h('button.btn', { type: 'button', onclick: () => m.close() }, 'Close')));
       return;
     }
-    body.append(h('p.small.muted', { style: { marginTop: 0 } }, (JT.Google.email(key) ? 'Signed in as ' + JT.Google.email(key) + '. ' : '') + 'Choose the learner to continue as:'));
+    if (email) body.append(h('p.small.muted', { style: { marginTop: 0 } }, 'Signed in as ' + email + '.'));
+    if (!list.length) body.append(h('p', 'There\'s nothing saved in this Google account yet.'));
+    for (const p of local) {
+      const b = h('button.btn.primary.sm', { type: 'button' }, 'Save to Drive');
+      b.onclick = async () => {
+        b.disabled = true;
+        chosen = true;
+        try {
+          await JT.Google.rekey(key, p.id);
+          m.close();
+          await JT.enterProfile(p.id);
+          const r = await JT.Sync.now();
+          JT.ui.toast(r.ok ? '✓ ' + p.name + ' is now saved in Google Drive and will keep syncing.' : 'Connected, but saving to Google Drive failed: ' + (r.error ? r.error.message : r.reason));
+        } catch (e) { chosen = false; b.disabled = false; JT.ui.toast(e.message); }
+      };
+      if (p === local[0]) body.append(h('div', { style: { fontWeight: 700, margin: '10px 0 2px' } }, 'Put a learner from this ' + JT.platform.device + ' into Google Drive'));
+      const s = p.summary;
+      body.appendChild(h('div.list-row', JT.ui.avatar(p.name, 40),
+        h('div.grow', h('b', p.name), h('div.small.muted', s ? [s.level, s.xp + ' XP'].filter(Boolean).join(' · ') : 'New learner')),
+        b));
+    }
+    if (list.length) body.append(h('div', { style: { fontWeight: 700, margin: '14px 0 2px' } }, 'Continue as a learner saved in Google Drive'));
     for (const d of list) {
       const s = d.summary || {};
       const b = h('button.btn.primary.sm', { type: 'button' }, 'Continue');
