@@ -572,9 +572,18 @@ table.tbl td, table.tbl th { padding: 8px 10px; border-bottom: 1px solid var(--l
   .say-bubble { max-width: 200px; padding: 8px 12px; }
   .say-bubble .jpt { font-size: calc(17px * var(--ts)); }
   .btn.lg { padding: 12px 20px; font-size: calc(15px * var(--ts)); }
-  /* text next to a button or control keeps a readable width; the control drops below it when there's no room */
-  .list-row { flex-wrap: wrap; padding: 12px 14px; }
-  .list-row > .grow, .banner > .grow { flex: 1 1 190px; }
+  /* lists: the Japanese takes the space it needs and the English stays in a right-hand column */
+  .list-row { padding: 12px 14px; }
+  .list-row > .grow { min-width: 0; }
+  .list-row > .en { flex: 0 1 auto; min-width: 0; overflow-wrap: anywhere; }
+  .list-row.wrap { flex-wrap: wrap; }
+  /* phrasebook: a whole phrase is too long to share a line, so the English sits right-aligned underneath */
+  .list-row.phrase { flex-wrap: wrap; row-gap: 4px; }
+  .list-row.phrase > .grow { flex: 1 1 calc(100% - 60px); }
+  .list-row.phrase > .en { margin-left: auto; max-width: none !important; }
+  /* settings rows: a control drops below its text when there's no room */
+  .list-row.setting { flex-wrap: wrap; }
+  .list-row.setting > .grow, .banner > .grow { flex: 1 1 190px; }
   .banner { flex-wrap: wrap; }
   .banner > .btn { margin-left: auto; }
   .review-hero { flex-wrap: wrap; gap: 16px !important; padding: 16px !important; }

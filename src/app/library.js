@@ -194,7 +194,7 @@
           (JT.state.extraWords = JT.state.extraWords || {})[key] = { m, en, level: 2 };
           if (JT.SRS.add(key)) { JT.Store.save(); add.classList.add('good'); add.innerHTML = JT.ui.ICONS.check; JT.ui.toast('Added to reviews'); JT.refreshNav(); }
         };
-        list.appendChild(h('div.list-row', JT.ui.sayBtn(m), h('div.grow', T.el(m, { furigana: 'always' }), h('div.romaji', T.romaji(m)), note ? h('div.tiny.muted', note) : null),
+        list.appendChild(h('div.list-row.phrase', JT.ui.sayBtn(m), h('div.grow', T.el(m, { furigana: 'always' }), h('div.romaji', T.romaji(m)), note ? h('div.tiny.muted', note) : null),
           h('div.en', { style: { maxWidth: '40%', textAlign: 'right' } }, en), add));
       }
       if (!items.length) list.appendChild(h('div.list-row.muted', 'No phrases found.'));
@@ -245,7 +245,7 @@
         const add = h('button.btn.icon.sm' + (JT.SRS.has(w.key) ? '.good' : ''), { type: 'button', title: JT.SRS.has(w.key) ? 'In your reviews' : 'Add to reviews' }, icon(JT.SRS.has(w.key) ? 'check' : 'plus'));
         add.onclick = () => { if (JT.SRS.add(w.key)) { JT.Store.save(); add.classList.add('good'); add.innerHTML = JT.ui.ICONS.check; JT.refreshNav(); } };
         const L = w.lesson && R.lessonById.get(w.lesson);
-        list.appendChild(h('div.list-row', JT.ui.sayBtn(w.m),
+        list.appendChild(h('div.list-row.wrap', JT.ui.sayBtn(w.m),
           h('div', { style: { minWidth: '180px' } }, T.el(w.m, { furigana: 'always' }), h('div.romaji', T.romaji(w.m))),
           h('div.grow.en', w.en, w.note ? h('div.tiny.muted', w.note) : null),
           w.jlpt ? h('span.pill.blue', 'N' + w.jlpt) : null,
@@ -284,7 +284,7 @@
         out.appendChild(h('h2', lv.title + ' ', h('span.pill.blue', lv.tag)));
         const list = h('div.card.flat', { style: { padding: 0 } });
         for (const [L, g] of items) {
-          const row = h('div.list-row', { style: { cursor: 'pointer' } },
+          const row = h('div.list-row.wrap', { style: { cursor: 'pointer' } },
             h('div', { style: { minWidth: '260px', maxWidth: '380px' } }, T.el(g.t, { furigana: 'always', keepSpaces: true })),
             h('div.grow.small.muted', g.m || (g.x || '').replace(/<[^>]+>/g, '').slice(0, 90) + '…'),
             stageDot('g:' + g.id),

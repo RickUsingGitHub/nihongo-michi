@@ -217,7 +217,7 @@
     const pg = h('div.page.page-narrow');
     pg.appendChild(h('div.page-head', h('div', h('h1', 'Settings'))));
     const save = () => { JT.Store.save(); };
-    const row = (label, hint, control) => h('div.list-row', h('div.grow', h('div', { style: { fontWeight: 600 } }, label), hint ? h('div.small.muted', hint) : null), control);
+    const row = (label, hint, control) => h('div.list-row.setting', h('div.grow', h('div', { style: { fontWeight: 600 } }, label), hint ? h('div.small.muted', hint) : null), control);
     const seg = (key, options, after) => {
       const el = h('div.seg');
       for (const [v, label] of options) {
@@ -356,7 +356,7 @@
     range.onchange = () => P.setTextSize(+range.value, true);
     const reset = h('button.btn.sm.ghost', { type: 'button', title: 'Back to the standard size for this ' + P.device }, 'Reset');
     reset.onclick = () => { range.value = P.defaultTextSize; range.oninput(); P.setTextSize(P.defaultTextSize, true); };
-    return h('div.list-row',
+    return h('div.list-row.setting',
       h('div.grow', h('div', { style: { fontWeight: 600 } }, 'Text size'),
         h('div.small.muted', 'Makes all text larger or smaller on this ' + P.device + '. ', h('span.jpt', 'あいうえお 日本語'))),
       h('div.row', { style: { flexWrap: 'nowrap', gap: '8px' } }, range, label, reset));
@@ -379,7 +379,7 @@
       JT.ui.clear(card);
       const email = JT.Google.email(id), s = JT.Sync.status[id] || {};
       if (!email) {
-        card.append(h('div.list-row',
+        card.append(h('div.list-row.setting',
           h('div.grow', h('div', { style: { fontWeight: 600 } }, 'Sync with Google Drive'),
             h('div.small.muted', 'Keep ' + st.name + '\'s progress the same on your computer and phone. It is stored in a private app folder in your own Google Drive that only Nihongo Michi can see; the app also reads your email address to show which account is connected. ', privacyLink())),
           googleButton(connect)));
@@ -390,7 +390,7 @@
           : s.state === 'error' ? 'Last sync failed: ' + (s.msg || 'unknown error')
             : s.at ? 'Last synced ' + agoText(s.at) : 'Syncs automatically while you study.';
       card.append(
-        h('div.list-row',
+        h('div.list-row.setting',
           h('div.grow', h('div', { style: { fontWeight: 600 } }, 'Connected as ' + email),
             h('div.small' + (s.state === 'error' || s.state === 'signin' ? '' : '.muted'), { style: s.state === 'error' || s.state === 'signin' ? { color: 'var(--bad)' } : {} }, line)),
           s.state === 'signin'
@@ -399,7 +399,7 @@
               const r = await JT.Sync.now({ renew: true });
               JT.ui.toast(r.ok ? '✓ Synced' : r.reason === 'signin' ? 'Please sign in to Google again.' : 'Sync failed: ' + (r.error ? r.error.message : r.reason));
             } }, icon('review'), 'Sync now')),
-        h('div.list-row',
+        h('div.list-row.setting',
           h('div.grow', h('div', { style: { fontWeight: 600 } }, 'Disconnect'),
             h('div.small.muted', 'Stops syncing on this ' + JT.platform.device + '. The copy in Google Drive stays, so your other devices keep it.')),
           h('button.btn.sm', { type: 'button', onclick: async () => {
@@ -559,7 +559,7 @@
       };
       if (p === local[0]) body.append(h('div', { style: { fontWeight: 700, margin: '10px 0 2px' } }, 'Put a learner from this ' + JT.platform.device + ' into Google Drive'));
       const s = p.summary;
-      body.appendChild(h('div.list-row', JT.ui.avatar(p.name, 40),
+      body.appendChild(h('div.list-row.setting', JT.ui.avatar(p.name, 40),
         h('div.grow', h('b', p.name), h('div.small.muted', s ? [s.level, s.xp + ' XP'].filter(Boolean).join(' · ') : 'New learner')),
         b));
     }
@@ -573,7 +573,7 @@
         try { await JT.Sync.restore(key, d); m.close(); JT.ui.toast('✓ Welcome back, ' + d.name + '! Your progress will keep syncing.'); }
         catch (e) { chosen = false; b.disabled = false; JT.ui.toast(e.message); }
       };
-      body.appendChild(h('div.list-row', JT.ui.avatar(d.name, 40),
+      body.appendChild(h('div.list-row.setting', JT.ui.avatar(d.name, 40),
         h('div.grow', h('b', d.name), h('div.small.muted', [s.level, s.xp != null ? s.xp + ' XP' : '', 'synced ' + agoText(d.savedAt)].filter(Boolean).join(' · '))),
         b));
     }

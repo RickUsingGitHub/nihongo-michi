@@ -22,7 +22,8 @@
     const counter = h('span.small.muted');
     const exit = h('button.btn.icon.ghost', { type: 'button', title: 'Exit' }, icon('close'));
     exit.onclick = async () => {
-      if (answered > 0 && !opts.noExitConfirm && !finished) {
+      // ask once the learner is past the first screen (not only after answering a question)
+      if ((answered > 0 || idx > 0) && !opts.noExitConfirm && !finished) {
         const ok = await JT.ui.confirmBox('Leave this session?', opts.exitMsg || 'Your progress in this session will be lost.', 'Leave', 'Keep going');
         if (!ok) return;
       }
