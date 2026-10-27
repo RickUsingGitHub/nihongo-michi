@@ -71,6 +71,9 @@
   const icon = (name, cls) => { const s = h('span' + (cls ? '.' + cls : ''), { html: ICONS[name] || '' }); s.style.display = 'inline-flex'; return s; };
 
   // Ko-fi. The desktop window opens no tabs of its own (see main.js), so it goes through the main process.
+  // Which build this is: the desktop app asks the main process, the web app reads src/version.js.
+  const appVersion = () => (window.api && window.api.appVersion) || (JT.BUILD && JT.BUILD.version) || '';
+
   const KOFI_URL = 'https://ko-fi.com/rickapps';
   const openKofi = () => {
     if (window.api && window.api.openKofi) window.api.openKofi();
@@ -328,7 +331,7 @@
   }
 
   JT.ui = {
-    h, append, clear, icon, ICONS, openKofi, shuffle, sample, pick, uniqBy, clamp, timeUntil, showRomaji, avatar,
+    h, append, clear, icon, ICONS, openKofi, appVersion, shuffle, sample, pick, uniqBy, clamp, timeUntil, showRomaji, avatar,
     sayBtn, recBtn, jpBlock, toast, modal, confirmBox, ring, stars, confetti, xpPop, strokeBox, mascot
   };
 })();

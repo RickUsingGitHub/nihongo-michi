@@ -333,7 +333,10 @@
 
     pg.appendChild(h('h2', 'About & credits'));
     pg.appendChild(h('div.card.small', { style: { lineHeight: 1.7 } },
-      h('p', { style: { marginTop: 0 } }, h('b', 'Nihongo Michi'), ' — lessons, dialogues, role-plays, grammar explanations and placement questions were written for this app.'),
+      h('p', { style: { marginTop: 0 } },
+        h('b', 'Nihongo Michi' + (JT.ui.appVersion() ? ' ' + JT.ui.appVersion() : '')),
+        JT.platform.web ? h('span.muted', ' (web app)') : null,
+        ' — lessons, dialogues, role-plays, grammar explanations and placement questions were written for this app.'),
       h('ul', { style: { paddingLeft: '18px' } },
         h('li', 'JLPT vocabulary lists: Jonathan Waller (tanos.co.uk), CC BY, via open-anki-jlpt-decks; English glosses from JMdict (EDRDG), CC BY-SA 4.0.'),
         h('li', 'Kanji meanings and readings: KANJIDIC (EDRDG), CC BY-SA 4.0, via the kanji-data project (MIT); everyday keywords for some beginner kanji written for this app.'),

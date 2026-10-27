@@ -17,6 +17,8 @@ contextBridge.exposeInMainWorld('api', {
   openSpeechSettings: () => ipcRenderer.invoke('open:speech-settings'),
   openPrivacy: () => ipcRenderer.invoke('open:privacy'),
   openKofi: () => ipcRenderer.invoke('open:kofi'),
+  // the app's version, read once at load (from package.json, via the main process)
+  appVersion: ipcRenderer.sendSync('app:version'),
   // Google sign-in for Drive sync (per learner; tokens stay in the main process)
   googleAvailable: () => ipcRenderer.invoke('google:available'),
   googleStatus: id => ipcRenderer.invoke('google:status', id),
