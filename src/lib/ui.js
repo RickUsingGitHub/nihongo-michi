@@ -65,7 +65,8 @@
     plus: svg('<path d="M12 5v14M5 12h14"/>'),
     bolt: svg('<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>', true),
     fire: svg('<path d="M12 22c4 0 7-3 7-7 0-5-5-7-5-12-3 2-4 5-4 7-1-1-2-2-2-4-2 2-3 5-3 9 0 4 3 7 7 7z"/>', true),
-    read: svg('<path d="M2 5h7a3 3 0 0 1 3 3v12a2 2 0 0 0-2-2H2zM22 5h-7a3 3 0 0 0-3 3v12a2 2 0 0 1 2-2h8z"/>')
+    read: svg('<path d="M2 5h7a3 3 0 0 1 3 3v12a2 2 0 0 0-2-2H2zM22 5h-7a3 3 0 0 0-3 3v12a2 2 0 0 1 2-2h8z"/>'),
+    coffee: svg('<path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><path d="M6 1v3M10 1v3M14 1v3"/>')
   };
   const icon = (name, cls) => { const s = h('span' + (cls ? '.' + cls : ''), { html: ICONS[name] || '' }); s.style.display = 'inline-flex'; return s; };
 

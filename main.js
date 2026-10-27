@@ -194,6 +194,7 @@ ipcMain.handle('tts:speak', async (_e, text, rate, voice, ssml) => {
 });
 ipcMain.handle('open:speech-settings', () => shell.openExternal('ms-settings:speech'));
 ipcMain.handle('open:privacy', () => shell.openExternal('https://rickusinggithub.github.io/privacy.html'));
+ipcMain.handle('open:kofi', () => shell.openExternal('https://ko-fi.com/rickapps'));
 
 // ---------- Google sign-in for Drive sync ----------
 // Uses the "Desktop app" OAuth client from google-oauth.local.json ({ "clientId", "clientSecret" }), which
