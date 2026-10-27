@@ -18,7 +18,8 @@
     { id: 'grammar', label: 'Grammar', ico: 'layers' },
     { sec: 'You' },
     { id: 'progress', label: 'Progress', ico: 'chart' },
-    { id: 'settings', label: 'Settings', ico: 'gear' }
+    { id: 'settings', label: 'Settings', ico: 'gear' },
+    { id: 'kofi', label: 'Buy a coffee', ico: 'coffee', action: () => JT.ui.openKofi() }
   ];
 
   let currentView = 'home';
@@ -33,7 +34,7 @@
         h('span.nav-ico', n.glyph ? n.glyph : { html: JT.ui.ICONS[n.ico] }),
         n.label,
         badge ? h('span.nav-badge', badge > 99 ? '99+' : badge) : null);
-      b.onclick = () => JT.go(n.id);
+      b.onclick = n.action || (() => JT.go(n.id));
       nav.appendChild(b);
     }
     renderTabbar();
@@ -70,7 +71,7 @@
   }
   function showMore() {
     let m;
-    const item = n => h('button.more-item', { type: 'button', onclick: () => { m.close(); JT.go(n.id); } }, navIco(n), n.label);
+    const item = n => h('button.more-item', { type: 'button', onclick: () => { m.close(); if (n.action) n.action(); else JT.go(n.id); } }, navIco(n), n.label);
     const items = NAV.filter(n => n.id && !TABS.includes(n.id));
     m = JT.ui.modal([
       h('div.more-list', items.map(item)),
