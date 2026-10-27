@@ -160,7 +160,11 @@
   }
 
   async function deleteProfile(id) {
-    if (api()) await api().profilesDelete(id); else local.remove(id);
+    if (api()) await api().profilesDelete(id);   // also forgets the learner's Google sign-in on this PC
+    else {
+      local.remove(id);
+      try { localStorage.removeItem('jt-google-' + id); } catch (e) { /* storage blocked */ }
+    }
     if (id === current) { current = null; useState(null); }
   }
 

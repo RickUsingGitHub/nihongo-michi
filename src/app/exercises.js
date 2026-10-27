@@ -48,7 +48,7 @@
     } else if (p.jp) {
       const big = h('div.big-jp');
       big.appendChild(T.el(p.jp, { level: spec.level, furigana: p.furigana, noTargets: true }));
-      if (p.big) big.style.fontSize = '84px';
+      if (p.big) big.style.fontSize = 'calc(84px * var(--ts))';
       const row = h('div.row', { style: { justifyContent: 'center', gap: '14px' } });
       if (p.audio) row.appendChild(JT.ui.sayBtn(p.audio));
       row.appendChild(big);

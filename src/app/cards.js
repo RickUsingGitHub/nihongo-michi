@@ -45,7 +45,7 @@
   C.kana = function (c) {
     const k = R.kana.get(c) || { c, r: Kana.toRomaji(c) };
     const left = h('div.stack', { style: { alignItems: 'center' } },
-      h('div.huge-char', c),
+      h('div.huge-char', { html: T.kanaHtml(c) }),
       h('div', { style: { fontSize: '30px', fontWeight: 800, color: 'var(--accent)' } }, k.r),
       h('div.row', { style: { justifyContent: 'center' } }, sayBtn(c), sayBtn(c, { slow: true })));
     const right = h('div.stack', { style: { flex: 1, minWidth: '240px' } });
@@ -66,7 +66,7 @@
     const row = h('div.kana-row');
     for (const c of chars) {
       const k = R.kana.get(c) || { c, r: Kana.toRomaji(c) };
-      const t = h('div.kana-tile', h('div.k', c), h('div.r', k.r), k.mn ? h('div.m', k.mn) : null);
+      const t = h('div.kana-tile', h('div.k', { html: T.kanaHtml(c) }), h('div.r', k.r), k.mn ? h('div.m', k.mn) : null);
       t.onclick = () => { JT.Audio.speak(c); };
       t.ondblclick = () => JT.ui.modal(C.kanaDetail(c), { wide: true });
       row.appendChild(t);
@@ -207,7 +207,7 @@
       rd.text.forEach((p, i) => {
         const para = h('div.jpline', sayBtn(p), h('div.body', T.el(p, { level, cls: 'passage-p' }),
           showEn.on && rd.en && rd.en[i] ? h('div.en.small', { style: { marginTop: '4px' } }, rd.en[i]) : null));
-        para.querySelector('.jpt').style.fontSize = '19px';
+        para.querySelector('.jpt').style.fontSize = 'calc(19px * var(--ts))';
         body.appendChild(para);
       });
     };

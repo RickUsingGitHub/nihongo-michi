@@ -266,7 +266,8 @@
 
     pg.appendChild(h('h2', 'Display'));
     pg.appendChild(h('div.card.flat', { style: { padding: 0 } },
-      row('Theme', null, seg('theme', [['system', 'System'], ['light', 'Light'], ['dark', 'Dark']], () => JT.applyTheme()))));
+      row('Theme', null, seg('theme', [['system', 'System'], ['light', 'Light'], ['dark', 'Dark']], () => JT.applyTheme())),
+      textSizeRow()));
 
     pg.appendChild(h('h2', 'Japanese text'));
     pg.appendChild(h('div.card.flat', { style: { padding: 0 } },
@@ -345,6 +346,22 @@
   }
 
   // ---------------- learner picker ----------------
+  // Settings → Display → Text size: applies straight away and is remembered for this device (all learners).
+  function textSizeRow() {
+    const P = JT.platform;
+    const pct = v => Math.round(v * 100) + '%';
+    const label = h('span.small', { style: { minWidth: '44px', textAlign: 'right', fontWeight: 650 } }, pct(P.textSize()));
+    const range = h('input', { type: 'range', min: 0.85, max: 1.5, step: 0.05, value: P.textSize(), style: { width: '170px' } });
+    range.oninput = () => { P.setTextSize(+range.value); label.textContent = pct(+range.value); };
+    range.onchange = () => P.setTextSize(+range.value, true);
+    const reset = h('button.btn.sm.ghost', { type: 'button', title: 'Back to the standard size for this ' + P.device }, 'Reset');
+    reset.onclick = () => { range.value = P.defaultTextSize; range.oninput(); P.setTextSize(P.defaultTextSize, true); };
+    return h('div.list-row',
+      h('div.grow', h('div', { style: { fontWeight: 600 } }, 'Text size'),
+        h('div.small.muted', 'Makes all text larger or smaller on this ' + P.device + '. ', h('span.jpt', 'あいうえお 日本語'))),
+      h('div.row', { style: { flexWrap: 'nowrap', gap: '8px' } }, range, label, reset));
+  }
+
   // Settings → Sync: connect this learner to their Google Drive so the computer and phone share progress.
   let syncListener = null;
   function syncCard() {

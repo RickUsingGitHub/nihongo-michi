@@ -309,10 +309,9 @@ ipcMain.handle('google:signin', (_e, key) => {
   return googleSignIn(key);
 });
 ipcMain.handle('google:token', (_e, key) => (googleKey(key) ? googleToken(key) : null));
-ipcMain.handle('google:signout', async (_e, key) => {
+// forgets this PC's sign-in only (a Google revoke would also cut off the learner's other devices)
+ipcMain.handle('google:signout', (_e, key) => {
   if (!googleKey(key)) return false;
-  const s = googleLoad(key);
-  if (s && s.refresh) await fetch('https://oauth2.googleapis.com/revoke?token=' + encodeURIComponent(s.refresh), { method: 'POST' }).catch(() => {});
   googleForget(key);
   return true;
 });

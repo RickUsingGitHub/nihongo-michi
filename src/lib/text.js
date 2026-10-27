@@ -15,6 +15,9 @@
   const cache = new Map();
 
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  // Small kana (ゃ ゅ ょ っ …) are drawn extra small so きょ never looks like きよ.
+  const SMALL_KANA = /[ぁぃぅぇぉっゃゅょゎゕゖァィゥェォッャュョヮヵヶ]/g;
+  const kanaHtml = s => esc(s).replace(SMALL_KANA, '<span class="sk">$&</span>');
 
   function parse(markup) {
     markup = String(markup ?? '');
@@ -159,7 +162,7 @@
         const want = s.t && !opts.noTargets;
         if (want && !open) { inner += '<span class="tgt">'; open = true; }
         if (!want && open) { inner += '</span>'; open = false; }
-        if (s.r == null) inner += esc(s.b);
+        if (s.r == null) inner += kanaHtml(s.b);
         else {
           const hide = fur === 'never' || (fur === 'smart' && knownBase(s.b));
           inner += `<ruby${hide ? ' class="nf"' : ''}>${esc(s.b)}<rt>${esc(s.r)}</rt></ruby>`;
@@ -178,7 +181,7 @@
     const span = document.createElement(opts.tag || 'span');
     span.className = 'jpt' + (opts.cls ? ' ' + opts.cls : '');
     span.innerHTML = html(m, opts);
-    if (opts.size) span.style.fontSize = opts.size + 'px';
+    if (opts.size) span.style.fontSize = 'calc(' + opts.size + 'px * var(--ts))';
     return span;
   }
 
@@ -194,5 +197,5 @@
     return stripTargets(m).trim().split(/\s+/).filter(Boolean);
   }
 
-  JT.T = { parse, surface, reading, words, romaji, ttsText, ttsReading, ttsSsml, ttsToken, html, el, esc, splitTarget, rawTokens, stripTargets, plain };
+  JT.T = { parse, surface, reading, words, romaji, ttsText, ttsReading, ttsSsml, ttsToken, html, el, esc, kanaHtml, splitTarget, rawTokens, stripTargets, plain };
 })();

@@ -33,7 +33,7 @@
     const cell = c => {
       if (!c || c === ' ') return h('div.kcell.empty');
       const k = R.kana.get(c) || { r: Kana.toRomaji(c) };
-      const el = h('div.kcell', h('div.k', c), h('div.r', k.r), stageDot('k:' + c));
+      const el = h('div.kcell', h('div.k', { html: T.kanaHtml(c) }), h('div.r', k.r), stageDot('k:' + c));
       el.onclick = () => { JT.Audio.speak(c); JT.ui.modal(JT.Cards.kanaDetail(c), { wide: true }); };
       return el;
     };
@@ -93,7 +93,7 @@
     const inp = h('input.type-input', { type: 'text', placeholder: 'type romaji', autocomplete: 'off', style: { maxWidth: '300px', margin: '0 auto', display: 'block' } });
     const timer = h('div', { style: { fontSize: '22px', fontWeight: 800 } });
     const sc = h('div', { style: { fontSize: '22px', fontWeight: 800, color: 'var(--good)' } });
-    const nextChar = () => { cur = chars[Math.floor(Math.random() * chars.length)]; big.textContent = cur; inp.value = ''; };
+    const nextChar = () => { cur = chars[Math.floor(Math.random() * chars.length)]; big.innerHTML = T.kanaHtml(cur); inp.value = ''; };
     const upd = () => { timer.textContent = '⏱ ' + left + 's'; sc.textContent = '✓ ' + score; };
     inp.addEventListener('input', () => {
       const v = inp.value.trim().toLowerCase();

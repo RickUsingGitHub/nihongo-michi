@@ -12,5 +12,20 @@
   P.web = !P.desktop;
   // for wording such as "progress on this phone"
   P.device = P.desktop ? 'computer' : P.ios || P.android ? 'phone' : 'browser';
+
+  // Text size for this device (Settings → Display): a multiplier on every font size via the --ts CSS variable.
+  // Phones start a little larger.
+  const TS_KEY = 'jt-text-size';
+  P.defaultTextSize = P.device === 'phone' ? 1.1 : 1;
+  P.textSize = () => {
+    let v = NaN;
+    try { v = parseFloat(localStorage.getItem(TS_KEY)); } catch (e) { /* storage blocked */ }
+    return v >= 0.8 && v <= 1.6 ? v : P.defaultTextSize;
+  };
+  P.setTextSize = (v, save) => {
+    if (document.documentElement) document.documentElement.style.setProperty('--ts', String(v));
+    if (save) try { localStorage.setItem(TS_KEY, String(v)); } catch (e) { /* storage blocked */ }
+  };
+  P.setTextSize(P.textSize());
   JT.platform = P;
 })();

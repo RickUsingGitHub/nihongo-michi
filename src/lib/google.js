@@ -83,13 +83,11 @@
       if (s && opts.renew && clientId() && maySilent(id)) webRedirect(id, 'sync', true, s.email);
       return null;
     },
+    // Forgets this device's sign-in. Deliberately not a Google "revoke": that would cancel the app's access
+    // for the whole Google account, pausing sync on the learner's other devices too.
     async signOut(id) {
       if (api()) await api().googleSignOut(id).catch(() => {});
-      else {
-        const s = webGet(id);
-        if (s && s.token) fetch('https://oauth2.googleapis.com/revoke?token=' + encodeURIComponent(s.token), { method: 'POST', mode: 'no-cors' }).catch(() => {});
-        try { localStorage.removeItem(KEY(id)); } catch (e) { /* storage blocked */ }
-      }
+      else try { localStorage.removeItem(KEY(id)); } catch (e) { /* storage blocked */ }
       delete linked[id];
     },
     // Moves a sign-in to another learner id ('pending' -> the learner restored from Drive).

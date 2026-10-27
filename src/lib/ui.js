@@ -15,7 +15,11 @@
         if (k.startsWith('on') && typeof v === 'function') el.addEventListener(k.slice(2), v);
         else if (k === 'html') el.innerHTML = v;
         else if (k === 'class') el.className = (el.className + ' ' + v).trim();
-        else if (k === 'style' && typeof v === 'object') Object.assign(el.style, v);
+        else if (k === 'style' && typeof v === 'object') {
+          Object.assign(el.style, v);
+          // pixel font sizes follow the Text size setting, like the stylesheet's
+          if (typeof v.fontSize === 'string' && /^\d+(\.\d+)?px$/.test(v.fontSize)) el.style.fontSize = 'calc(' + v.fontSize + ' * var(--ts))';
+        }
         else if (k === 'value' || k === 'checked' || k === 'disabled' || k === 'selected') el[k] = v;
         else el.setAttribute(k, v === true ? '' : v);
       }
@@ -185,7 +189,8 @@
   function confirmBox(title, msg, okLabel = 'OK', cancelLabel = 'Cancel') {
     return new Promise(resolve => {
       let m;
-      const done = v => { m.close(); resolve(v); };
+      // answer first: closing the dialog counts as "cancel", which must not win over the button pressed
+      const done = v => { resolve(v); m.close(); };
       m = modal([
         h('h2', title), h('p.muted', msg),
         h('div.row', { style: { justifyContent: 'flex-end', marginTop: '18px' } },
