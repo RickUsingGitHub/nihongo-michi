@@ -25,6 +25,8 @@ unzip it anywhere and run **Nihongo Michi.exe**. There's nothing to install.
 
 Progress is saved per learner in `%APPDATA%\Nihongo Michi\profiles`, so several people can share one PC.
 
+Nihongo Michi is free — no ads, no account. If it is helping you learn, you can [buy me a coffee](https://ko-fi.com/rickapps).
+
 ## On your phone
 
 Open **<https://rickusinggithub.github.io/nihongo-michi/>** on your iPhone or Android phone and add it to your
