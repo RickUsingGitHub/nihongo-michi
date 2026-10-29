@@ -163,7 +163,7 @@
     const tileEls = tiles.map(t => {
       const el = h('button.tile', { type: 'button' }, T.el(t.m, { level: spec.level, noTargets: true }));
       el.onclick = () => {
-        if (answered) return;
+        if (answered || el.classList.contains('used')) return;   // a word can only be placed once
         JT.Audio.sfx('tap');
         chosen.push(t);
         el.classList.add('used');

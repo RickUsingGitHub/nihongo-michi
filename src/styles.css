@@ -398,7 +398,9 @@ input[type=range] { accent-color: var(--accent); }
   background: var(--surface); cursor: pointer; box-shadow: 0 2px 0 var(--line); transition: transform .08s; line-height: 1.6;
 }
 .tile:hover { border-color: var(--indigo); }
-.tile.used { visibility: hidden; }
+/* a placed tile leaves a gap: nothing inside it may show (its furigana would) or be tapped */
+.tile.used, .tile.used * { visibility: hidden !important; }
+.tile.used { pointer-events: none; }
 .tile rt { font-size: .5em; color: var(--muted); }
 .match-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 24px; }
 .match-col { display: flex; flex-direction: column; gap: 10px; }

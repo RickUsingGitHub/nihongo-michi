@@ -86,7 +86,8 @@
   if (JT.platform.touch) {
     document.addEventListener('click', e => {
       const r = e.target.closest && e.target.closest('ruby.nf');
-      if (r) r.classList.toggle('peek');
+      // not inside answer buttons and word tiles: tapping those answers the question
+      if (r && !r.closest('button, .match-item')) r.classList.toggle('peek');
     });
   }
 
