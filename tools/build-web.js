@@ -38,7 +38,8 @@ self.addEventListener('install', e => {
 
 self.addEventListener('activate', e => {
   e.waitUntil(caches.keys()
-    .then(keys => Promise.all(keys.filter(k => k !== VERSION).map(k => caches.delete(k))))
+    // Other apps share this origin (rickusinggithub.github.io/...): remove only this app's old caches.
+    .then(keys => Promise.all(keys.filter(k => k.startsWith('michi-') && k !== VERSION).map(k => caches.delete(k))))
     .then(() => self.clients.claim()));
 });
 

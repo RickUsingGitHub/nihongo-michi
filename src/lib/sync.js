@@ -140,14 +140,23 @@
     if (!id || !JT.Google.email(id)) return { ok: false, reason: 'off' };
     const auth = await JT.Google.token(id, { renew: !!opts.renew });
     if (!auth) { setStatus(id, 'signin'); return { ok: false, reason: 'signin' }; }
+    const before = Object.assign({ state: 'ok' }, status[id]);
     setStatus(id, 'syncing', { email: auth.email });
+    // JT.state is whichever learner is open now. After every wait, check it is still this one,
+    // or another learner's progress could be merged into, or uploaded as, this learner's file.
+    // If not, stop and put this learner's status back as it was (it syncs when next opened).
+    const switched = () => JT.Store.currentProfile() !== id;
+    const stop = () => { setStatus(id, before.state === 'syncing' ? 'ok' : before.state, { msg: before.msg || '' }); return { ok: false, reason: 'switched' }; };
     try {
+      if (switched()) return stop();
       const files = await Drive.list(auth.token);
+      if (switched()) return stop();
       const f = files.find(x => x.name === fileName(id));
       if (f) {
         const remote = await Drive.read(auth.token, f.id);
-        if (JT.Store.currentProfile() !== id) return { ok: false, reason: 'switched' };
+        if (switched()) return stop();
         if (remote && remote.state) await apply(id, merge(JT.state, remote.state));
+        if (switched()) return stop();
       }
       const seq = savedSeq;
       const data = payload(id);
