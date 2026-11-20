@@ -176,6 +176,33 @@ const eq = (got, want, label) => {
     { passed: true, best: 50, at: 2 }, 'tests keep the best');
   eq(pcJ.Sync.streakFrom({ '2026-01-01': 5, '2026-01-02': 3, '2026-01-04': 1, '2026-01-05': 2 }), { n: 2, last: '2026-01-05' }, 'streak counts back from the last day');
 
+  // 9. switching learner while a first sync is waiting on Drive must not upload the other learner
+  const tablet = device('tablet');
+  const T = tablet.JT;
+  const alice = await T.Store.createProfile('Alice');
+  T.Store.addXP(7);
+  const bob = await T.Store.createProfile('Bob');
+  T.Store.addXP(99);
+  T.Store.closeProfile();                         // switching learners, as the app does
+  await T.Store.openProfile(alice);
+  tablet.signIn(alice);
+  await T.Google.load(alice);
+  const realFetch = tablet.win.fetch;
+  tablet.win.fetch = async (url, opts) => {
+    if (/\/drive\/v3\/files\?/.test(url)) {        // the file list: the learner is switched meanwhile
+      tablet.win.fetch = realFetch;
+      T.Store.closeProfile();
+      await T.Store.openProfile(bob);
+    }
+    return realFetch(url, opts);
+  };
+  r = await T.Sync.now();
+  const aliceFile = [...drive.files.values()].find(f => f.name === 'nihongo-michi-' + alice + '.json');
+  eq([r.ok, r.reason], [false, 'switched'], 'first sync stops when the learner is switched');
+  eq(aliceFile ? JSON.parse(aliceFile.body).name : null, null, "Bob's progress is not saved as Alice's");
+  eq([T.Store.currentProfile(), T.state.name, T.state.xp], [bob, 'Bob', 99], 'Bob stays open with his own progress');
+  eq(T.Sync.status[alice].state !== 'syncing', true, "Alice's status isn't left on 'syncing'");
+
   console.log(fails ? fails + ' failed' : 'all passed', `(${drive.calls} Drive calls)`);
   process.exit(fails ? 1 : 0);
 })().catch(e => { console.error(e); process.exit(1); });
